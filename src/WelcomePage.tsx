@@ -53,6 +53,7 @@ export function WelcomePage({ setGlobalState, isBeeRunning, hasPostageStamp }: P
                 </Horizontal>
                 <Horizontal gap={8}>
                     <input
+                        className="etherjot-input"
                         type="text"
                         placeholder="Enter your blog's name"
                         onChange={event => setBlogName(event.target.value)}
