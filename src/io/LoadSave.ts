@@ -28,7 +28,7 @@ export async function saveToDrive(globalState: GlobalState, content: string, art
             Swal.showLoading()
             const fdp = await makeFdp(globalState)
             await fdp.account.login(credentials.username, credentials.password)
-            await fdp.file.uploadData('etherjot', `/${title}`, fileContent)
+            await fdp.file.uploadData(pod, `/${title}`, fileContent)
             await Swal.fire('Saved to Drive')
         })
     })
