@@ -1,0 +1,150 @@
+@font-face {
+    font-family: space-grotesk;
+    src: url('/assets/space-grotesk.woff2') format('woff2');
+}
+
+* {
+    box-sizing: border-box;
+}
+
+p,
+h1,
+h2 {
+    margin: 0;
+}
+
+body,
+p {
+    font-family: space-grotesk;
+}
+
+html {
+    background: #e8e8e8;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: row;
+}
+
+button {
+    border: 0;
+    background-color: #ff8a00;
+    padding: 8px 16px;
+    font-family: space-grotesk;
+}
+
+button:hover {
+    background-color: #ff9e2e;
+    cursor: pointer;
+}
+
+button:active {
+    background-color: #ffc787;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    background-color: #ff8a0066;
+}
+
+.button-secondary {
+    background-color: #ffffff;
+    height: 33px;
+    width: 100%;
+}
+
+.button-small {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.button-menu {
+    border-radius: 0;
+    padding: 4px 32px;
+    background: #e0e0e0;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.global-settings {
+    padding: 16px;
+    padding-bottom: 64px;
+}
+
+.editing {
+    padding: 8px;
+    background-color: white;
+    border-radius: 4px;
+}
+
+img {
+    max-width: 100%;
+}
+
+.menu-item {
+    padding: 0 16px;
+    background-color: #ffffff;
+    position: relative;
+    height: 26px;
+    display: flex;
+    align-items: center;
+}
+
+.menu-item:hover {
+    background-color: #c0c0c0;
+    cursor: pointer;
+}
+
+.menu-item:hover .dropdown-menu {
+    display: flex;
+}
+
+.dropdown-menu {
+    display: none;
+    z-index: 1;
+    position: absolute;
+    top: 26px;
+    left: 0px;
+    flex-direction: column;
+    background-color: #a0a0a0;
+}
+
+.dropdown-menu-item {
+    width: 200px;
+    background-color: #c0c0c0;
+    padding: 16px;
+}
+
+.dropdown-menu-item:hover {
+    background-color: #a0a0a0;
+}
+
+a {
+    text-decoration: none;
+    color: #0074d9;
+}
+
+.etherjot-input,
+.etherjot-select,
+.etherjot-textarea {
+    border: 0;
+    padding: 8px;
+    width: 100%;
+    font-family: space-grotesk;
+}
+
+.etherjot-textarea {
+    min-width: 30vw;
+}

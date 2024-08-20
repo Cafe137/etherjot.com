@@ -1,0 +1,9 @@
+.thumbnail-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    overflow: scroll;
+}
+.thumbnail > img {
+    width: 200px;
+    height: 200px;
+}
