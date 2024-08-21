@@ -81,10 +81,10 @@ export async function onDriveExport(globalState: GlobalState) {
                 )
             }
             Swal.hideLoading()
-            Swal.fire('Exported to Drive')
+            Swal.fire('Exported to Fairdrive')
         } catch (error) {
             console.error(error)
-            Swal.fire('Error', 'Failed to export to Drive', 'error')
+            Swal.fire('Error', 'Failed to export to Fairdrive', 'error')
         }
     })
 }

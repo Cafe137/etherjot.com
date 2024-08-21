@@ -24,12 +24,12 @@ export async function saveToDrive(globalState: GlobalState, content: string, art
     const title = article ? article.title : 'Untitled.md'
     ;(await swalLogin()).ifPresent(async credentials => {
         ;(await swalPods(globalState, credentials)).ifPresent(async pod => {
-            Swal.fire('Saving to Drive...')
+            Swal.fire('Saving to Fairdrive...')
             Swal.showLoading()
             const fdp = await makeFdp(globalState)
             await fdp.account.login(credentials.username, credentials.password)
             await fdp.file.uploadData(pod, `/${title}`, fileContent)
-            await Swal.fire('Saved to Drive')
+            await Swal.fire('Saved to Fairdrive')
         })
     })
 }
