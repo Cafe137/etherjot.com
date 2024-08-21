@@ -80,8 +80,8 @@ export function ExistingArticle({
                     {article.title}
                 </a>
             </Typography>
-            <Icon src="/assets/edit.svg" onClick={onEdit} size={16} />
-            <Icon src="/assets/minus.svg" onClick={onDelete} size={16} />
+            <Icon src="./assets/edit.svg" onClick={onEdit} size={16} />
+            <Icon src="./assets/minus.svg" onClick={onDelete} size={16} />
         </Horizontal>
     )
 }
