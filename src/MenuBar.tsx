@@ -164,11 +164,11 @@ export function MenuBar({
             <Horizontal gap={16} p="0px 4px">
                 <Horizontal gap={2}>
                     <Typography size={14}>Bee</Typography>
-                    <SquareImage size={14} src={isBeeRunning ? '/assets/yes.png' : '/assets/no.png'} />
+                    <SquareImage size={14} src={isBeeRunning ? './assets/yes.png' : './assets/no.png'} />
                 </Horizontal>
                 <Horizontal gap={2}>
                     <Typography size={14}>Stamp</Typography>
-                    <SquareImage size={14} src={hasPostageStamp ? '/assets/yes.png' : '/assets/no.png'} />
+                    <SquareImage size={14} src={hasPostageStamp ? './assets/yes.png' : './assets/no.png'} />
                 </Horizontal>
             </Horizontal>
         </Horizontal>

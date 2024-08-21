@@ -35,13 +35,13 @@ export function WelcomePage({ setGlobalState, isBeeRunning, hasPostageStamp }: P
                 <ul>
                     <li>
                         <Horizontal gap={8}>
-                            <SquareImage size={32} src={isBeeRunning ? '/assets/yes.png' : '/assets/no.png'} />
+                            <SquareImage size={32} src={isBeeRunning ? './assets/yes.png' : './assets/no.png'} />
                             Local Bee node
                         </Horizontal>
                     </li>
                     <li>
                         <Horizontal gap={8}>
-                            <SquareImage size={32} src={hasPostageStamp ? '/assets/yes.png' : '/assets/no.png'} />
+                            <SquareImage size={32} src={hasPostageStamp ? './assets/yes.png' : './assets/no.png'} />
                             Usable postage stamp
                         </Horizontal>
                     </li>
