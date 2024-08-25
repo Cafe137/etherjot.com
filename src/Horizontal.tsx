@@ -4,10 +4,9 @@ interface Props {
     gap?: number
     between?: boolean
     background?: string
-    borderRadius?: number
 }
 
-export function Horizontal({ children, p = '0', gap = 8, between, background, borderRadius }: Props) {
+export function Horizontal({ children, p = '0', gap = 8, between, background }: Props) {
     const style = {
         display: 'flex',
         flexDirection: 'row' as 'row',
@@ -15,8 +14,7 @@ export function Horizontal({ children, p = '0', gap = 8, between, background, bo
         justifyContent: between ? 'space-between' : 'flex-start',
         gap: `${gap}px`,
         padding: p,
-        background,
-        borderRadius: `${borderRadius}px`
+        background
     }
 
     return <div style={style}>{children}</div>
