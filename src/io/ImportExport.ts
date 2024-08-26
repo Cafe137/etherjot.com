@@ -81,10 +81,10 @@ export async function onDriveExport(globalState: GlobalState) {
                 )
             }
             Swal.hideLoading()
-            Swal.fire('Exported to Fairdrive')
+            Swal.fire('Exported to FDP Storage')
         } catch (error) {
             console.error(error)
-            Swal.fire('Error', 'Failed to export to Fairdrive', 'error')
+            Swal.fire('Error', 'Failed to export to FDP Storage', 'error')
         }
     })
 }

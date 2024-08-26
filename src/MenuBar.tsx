@@ -138,8 +138,8 @@ export function MenuBar({
                         { name: 'New Article', onClick: onNewArticle },
                         { name: 'Assets...', onClick: onShowAssetBrowser },
                         { name: 'Save as markdown', onClick: onSaveAsMarkdown },
-                        { name: 'Save to Fairdrive', onClick: onSaveToDrive },
-                        { name: 'Load from Fairdrive', onClick: onLoadFromDrive }
+                        { name: 'Save to FDP Storage', onClick: onSaveToDrive },
+                        { name: 'Load from FDP Storage', onClick: onLoadFromDrive }
                     ]}
                 />
                 <MenuItem name="View" actions={[{ name: 'Swarm Hash', onClick: onViewSwarmHash }]} />
@@ -156,8 +156,8 @@ export function MenuBar({
                     actions={[
                         { name: 'Export as zip', onClick: () => onExport(globalState) },
                         { name: 'Import from zip', onClick: () => onImport() },
-                        { name: 'Export to Fairdrive', onClick: () => onDriveExport(globalState) },
-                        { name: 'Import from Fairdrive', onClick: () => onDriveImport() }
+                        { name: 'Export to FDP Storage', onClick: () => onDriveExport(globalState) },
+                        { name: 'Import from FDP Storage', onClick: () => onDriveImport() }
                     ]}
                 />
             </Horizontal>
