@@ -12,13 +12,13 @@ export async function swalLogin(): Promise<Optional<Credentials>> {
     let passwordInput: HTMLInputElement
 
     const result = await Swal.fire<LoginFormResult>({
-        title: 'FDS Login',
+        title: 'FDP Storage',
         html: `
     <input type="text" id="username" class="swal2-input" placeholder="Username">
     <input type="password" id="password" class="swal2-input" placeholder="Password">
-    <p><a href="https://create.fairdatasociety.org/" target="_blank">I don't have an FDS account</a></p>
+    <p><a href="https://create.fairdatasociety.org/" target="_blank">I don't have an FDP account</a></p>
   `,
-        confirmButtonText: 'Sign in',
+        confirmButtonText: 'Connect',
         focusConfirm: false,
         didOpen: () => {
             const popup = Swal.getPopup()!
