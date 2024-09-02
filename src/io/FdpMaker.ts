@@ -7,7 +7,7 @@ export async function makeFdp(globalState: GlobalState): Promise<FdpStorage> {
         (globalState.postageBatchId || (await globalState.swarm.mustGetUsableStamp())) as any,
         {
             ensOptions: {
-                rpcUrl: 'https://sepolia.drpc.org',
+                rpcUrl: globalState.configuration.sepolia,
                 contractAddresses: {
                     ensRegistry: '0x42a96D45d787685ac4b36292d218B106Fb39be7F',
                     fdsRegistrar: '0xFBF00389140C00384d88d458239833E3231a7414',
@@ -19,7 +19,7 @@ export async function makeFdp(globalState: GlobalState): Promise<FdpStorage> {
                 performChecks: true
             },
             providerOptions: {
-                url: 'https://sepolia.drpc.org'
+                url: globalState.configuration.sepolia
             },
             ensDomain: 'fds'
         }

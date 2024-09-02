@@ -10,6 +10,7 @@ export interface Asset {
 }
 
 interface Configuration {
+    sepolia: string
     title: string
     header: {
         title: string
@@ -92,6 +93,7 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
         beeApi: Types.asString(json.beeApi),
         postageBatchId: Types.asEmptiableString(json.postageBatchId),
         configuration: {
+            sepolia: Types.asString(Objects.getDeep(configuration, 'sepolia') ?? 'https://sepolia.drpc.org'),
             title: Types.asString(configuration.title),
             header: {
                 title: Types.asEmptiableString(Objects.getDeep(configuration, 'header.title')),
@@ -204,6 +206,7 @@ export async function createDefaultGlobalState(
         articles: [],
         feed,
         configuration: {
+            sepolia: 'https://sepolia.drpc.org',
             title: websiteName,
             header: {
                 title: '',

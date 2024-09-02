@@ -9,8 +9,8 @@ interface Props {
 export function PickableAsset({ asset, callback }: Props) {
     return (
         <div className="thumbnail" onClick={() => callback(Optional.of(asset))}>
-            <img src={Strings.joinUrl('http://localhost:1633/bytes', asset.reference)} />
-            <div className="thumbnail-name">{asset.name}</div>
+            <img className="thumbnail-image" src={Strings.joinUrl('http://localhost:1633/bytes', asset.reference)} />
+            <p className="thumbnail-name">{asset.name}</p>
         </div>
     )
 }

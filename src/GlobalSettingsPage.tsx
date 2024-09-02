@@ -32,6 +32,7 @@ export function GlobalSettingsPage({ globalState, setGlobalState, setShowAssetPi
     const [ethereumAddress, setEthereumAddress] = useState(globalState.configuration.extensions.ethereumAddress)
     const [donations, setDonations] = useState(globalState.configuration.extensions.donations)
     const [comments, setComments] = useState(globalState.configuration.extensions.comments)
+    const [sepolia, setSepolia] = useState(globalState.configuration.sepolia)
     const [postageBatchId, setPostageBatchId] = useState(globalState.postageBatchId)
 
     async function onSave() {
@@ -51,6 +52,7 @@ export function GlobalSettingsPage({ globalState, setGlobalState, setShowAssetPi
         globalState.configuration.extensions.ethereumAddress = ethereumAddress
         globalState.configuration.extensions.donations = donations
         globalState.configuration.extensions.comments = comments
+        globalState.configuration.sepolia = sepolia
         globalState.postageBatchId = postageBatchId
         await save(globalState)
         setGlobalState({ ...globalState })
@@ -139,6 +141,10 @@ export function GlobalSettingsPage({ globalState, setGlobalState, setShowAssetPi
                     <input onChange={event => setComments(event.target.checked)} type="checkbox" checked={comments} />
                     Enable comments
                 </Horizontal>
+            </Container>
+            <h2>FDP Storage</h2>
+            <Container>
+                <Setting title="Sepolia JSON-RPC" value={sepolia} onChange={setSepolia} />
             </Container>
             <h2>Apply changes</h2>
             <Button onClick={onSave}>Save</Button>

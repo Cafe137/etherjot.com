@@ -6,13 +6,12 @@ import { GlobalState } from '../libetherjot'
 interface Props {
     globalState: GlobalState
     name: string
-    contentType: string
     reference: string
     insertAsset: (reference: string) => void
     rerender: (callback: (x: number) => number) => void
 }
 
-export function Thumbnail({ globalState, name, contentType, reference, insertAsset, rerender }: Props) {
+export function Thumbnail({ globalState, name, reference, insertAsset, rerender }: Props) {
     async function onRename() {
         const newName = await Swal.fire({
             title: 'New Name',
@@ -41,8 +40,8 @@ export function Thumbnail({ globalState, name, contentType, reference, insertAss
 
     return (
         <div className="thumbnail">
-            <img src={`http://localhost:1633/bytes/${reference}`} />
-            <div className="thumbnail-name">{name}</div>
+            <img className="thumbnail-image" src={`http://localhost:1633/bytes/${reference}`} />
+            <p className="thumbnail-name">{name}</p>
             <Horizontal gap={8}>
                 <Button small onClick={() => insertAsset(reference)}>
                     Insert

@@ -10,13 +10,40 @@ interface Directory {
     directories: { name: string }[]
 }
 
-function addOptions(to: Record<string, string>, from: Directory) {
-    for (const file of from.files) {
-        to[file.name] = file.name
+function addOptions(to: Record<string, string>, from: Directory, directoriesOnly = false) {
+    if (!directoriesOnly) {
+        for (const file of from.files) {
+            to[file.name] = file.name
+        }
     }
     for (const directory of from.directories) {
         to[directory.name] = `/${directory.name}`
     }
+}
+
+export async function swalDirectories(globalState: GlobalState, credentials: Credentials, pod: string, prefix = '') {
+    Swal.fire('Getting files...')
+    Swal.showLoading()
+    const files = await getFiles(globalState, credentials, pod, prefix)
+    Swal.hideLoading()
+    Swal.close()
+    const inputOptions: Record<string, string> = {}
+    addOptions(inputOptions, files, true)
+    const result = await Swal.fire({
+        title: 'Select a directory',
+        input: 'select',
+        inputOptions,
+        inputPlaceholder: 'Select a directory',
+        showCancelButton: true
+    })
+    if (!result.value) {
+        return Optional.empty<string>()
+    }
+    let fullPath = `${prefix}/${result.value}`
+    while (fullPath.startsWith('//')) {
+        fullPath = fullPath.substring(1)
+    }
+    return Optional.of(fullPath)
 }
 
 export async function swalFiles(

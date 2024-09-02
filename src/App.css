@@ -19,12 +19,13 @@ p {
 }
 
 html {
-    background: #e8e8e8;
+    background: #ffffff;
     margin: 0;
     padding: 0;
 }
 
 body {
+    background: #e8e8e8;
     margin: 0;
     padding: 0;
 }
@@ -35,6 +36,7 @@ main {
 }
 
 button {
+    white-space: nowrap;
     border: 0;
     background-color: #ff8a00;
     padding: 8px 16px;
@@ -56,9 +58,13 @@ button:disabled {
 }
 
 .button-secondary {
-    background-color: #ffffff;
+    background-color: #f9f9f9;
     height: 33px;
     width: 100%;
+}
+
+.button-secondary:hover {
+    background-color: #ffffff;
 }
 
 .button-small {
@@ -81,6 +87,20 @@ ul {
 .global-settings {
     padding: 16px;
     padding-bottom: 64px;
+    width: 100%;
+}
+
+.global-settings h2 {
+    margin-top: 32px;
+    margin-bottom: 16px;
+}
+
+.global-settings input[type='text'] {
+    width: 400px;
+}
+
+.global-settings textarea {
+    width: 400px;
 }
 
 .editing {

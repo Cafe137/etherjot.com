@@ -114,21 +114,23 @@ function App() {
                 setArticleType={setArticleType}
             />
             <main>
-                <Sidebar
-                    globalState={globalState}
-                    setTab={setTab}
-                    editing={editing}
-                    setEditing={setEditing}
-                    articleContent={articleContent}
-                    setArticleContent={setArticleContent}
-                    setArticleTitle={setArticleTitle}
-                    setArticleBanner={setArticleBanner}
-                    setArticleCategory={setArticleCategory}
-                    setShowAssetBrowser={setShowAssetBrowser}
-                    setArticleTags={setArticleTags}
-                    setArticleCommentsFeed={setCommentsFeed}
-                    setArticleType={setArticleType}
-                />
+                {tab === 'new-post' && (
+                    <Sidebar
+                        globalState={globalState}
+                        setTab={setTab}
+                        editing={editing}
+                        setEditing={setEditing}
+                        articleContent={articleContent}
+                        setArticleContent={setArticleContent}
+                        setArticleTitle={setArticleTitle}
+                        setArticleBanner={setArticleBanner}
+                        setArticleCategory={setArticleCategory}
+                        setShowAssetBrowser={setShowAssetBrowser}
+                        setArticleTags={setArticleTags}
+                        setArticleCommentsFeed={setCommentsFeed}
+                        setArticleType={setArticleType}
+                    />
+                )}
                 {tab === 'new-post' && (
                     <NewPostPage articleContent={articleContent} setArticleContent={setArticleContent} />
                 )}
