@@ -1,3 +1,6 @@
+import { TextareaInput } from './TextareaInput'
+import { TextInput } from './TextInput'
+
 interface Props {
     onChange: (value: string) => void
     title: string
@@ -9,11 +12,8 @@ interface Props {
 export function Setting({ title, onChange, value, type = 'text', values }: Props) {
     return (
         <div>
-            <p style={{ paddingLeft: '8px', paddingBottom: '8px' }}>{title}</p>
-            {type === 'text' && <input type="text" onChange={event => onChange(event.target.value)} value={value} />}
-            {type === 'textarea' && (
-                <textarea onChange={event => onChange(event.target.value)} value={value}></textarea>
-            )}
+            {type === 'text' && <TextInput setter={onChange} value={value} label={title} />}
+            {type === 'textarea' && <TextareaInput setter={onChange} value={value} label={title} />}
             {type === 'select' && values && (
                 <select onChange={event => onChange(event.target.value)} value={value}>
                     {values.map(x => (
