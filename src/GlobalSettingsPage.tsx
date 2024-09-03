@@ -144,7 +144,7 @@ export function GlobalSettingsPage({ globalState, setGlobalState, setShowAssetPi
             </Container>
             <h2>FDP Storage</h2>
             <Container>
-                <Setting title="Sepolia JSON-RPC" value={sepolia} onChange={setSepolia} />
+                <Setting title="Sepolia JSON RPC" value={sepolia} onChange={setSepolia} />
             </Container>
             <h2>Apply changes</h2>
             <Button onClick={onSave}>Save</Button>
