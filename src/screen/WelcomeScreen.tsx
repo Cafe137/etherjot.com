@@ -102,7 +102,7 @@ export function WelcomeScreen() {
 
     return (
         <Horizontal full top p="32px" gap={32}>
-            <Vertical gap={63} flex={1} color="#ffffff" p="32px">
+            <Vertical gap={104} flex={1} color="#ffffff" p="32px">
                 <Banner />
                 <Vertical gap={32} left full>
                     <Typography>
@@ -122,8 +122,8 @@ export function WelcomeScreen() {
                         content or support hosting.
                     </Typography>
                     <Typography>
-                        <strong>Made for Web3.</strong>
-                        Uses the Swarm network to store and host your blog out of the box, no server required.
+                        <strong>Made for Web3.</strong> Uses the Swarm network to store and host your blog out of the
+                        box, no server required.
                     </Typography>
                     <Vertical full>
                         <Typography size={12}>
