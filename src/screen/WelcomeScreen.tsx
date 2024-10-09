@@ -1,5 +1,5 @@
 import { Bee, PostageBatch } from '@ethersphere/bee-js'
-import { Dates } from 'cafe-utility'
+import { Dates, System } from 'cafe-utility'
 import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { Banner } from '../Banner'
@@ -24,15 +24,11 @@ export function WelcomeScreen() {
 
     useEffect(() => {
         const bee = new Bee(url)
-        bee.checkConnection()
-            .then(() => setBeeRunning(true))
-            .catch(() => setBeeRunning(false))
-        const interval = setInterval(() => {
+        return System.runAndSetInterval(() => {
             bee.checkConnection()
                 .then(() => setBeeRunning(true))
                 .catch(() => setBeeRunning(false))
         }, 5_000)
-        return clearInterval(interval)
     }, [url])
 
     useEffect(() => {

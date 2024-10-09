@@ -1,4 +1,5 @@
 import { Bee } from '@ethersphere/bee-js'
+import { System } from 'cafe-utility'
 import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import {
@@ -29,14 +30,7 @@ export function MenuBar({ blogState, swarmState }: Props) {
 
     useEffect(() => {
         const bee = new Bee(swarmState.beeApi)
-        bee.getTopology()
-            .then(({ connected }) => {
-                setPeers(connected)
-            })
-            .catch(() => {
-                setPeers(null)
-            })
-        const interval = setInterval(() => {
+        return System.runAndSetInterval(() => {
             bee.getTopology()
                 .then(({ connected }) => {
                     setPeers(connected)
@@ -45,7 +39,6 @@ export function MenuBar({ blogState, swarmState }: Props) {
                     setPeers(null)
                 })
         }, 3000)
-        return () => clearInterval(interval)
     }, [swarmState])
 
     function onSettings() {

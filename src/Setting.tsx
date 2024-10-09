@@ -1,5 +1,7 @@
 import { TextareaInput } from './TextareaInput'
 import { TextInput } from './TextInput'
+import { Typography } from './Typography'
+import { Vertical } from './Vertical'
 
 interface Props {
     onChange: (value: string) => void
@@ -7,11 +9,12 @@ interface Props {
     value: string
     type?: 'text' | 'textarea' | 'select'
     values?: { name: string; value: string }[]
+    hint?: string
 }
 
-export function Setting({ title, onChange, value, type = 'text', values }: Props) {
+export function Setting({ title, onChange, value, type = 'text', values, hint }: Props) {
     return (
-        <div>
+        <Vertical gap={4} left full>
             {type === 'text' && <TextInput setter={onChange} value={value} label={title} />}
             {type === 'textarea' && <TextareaInput setter={onChange} value={value} label={title} />}
             {type === 'select' && values && (
@@ -23,6 +26,11 @@ export function Setting({ title, onChange, value, type = 'text', values }: Props
                     ))}
                 </select>
             )}
-        </div>
+            {hint && (
+                <Typography size={12} dim>
+                    {hint}
+                </Typography>
+            )}
+        </Vertical>
     )
 }

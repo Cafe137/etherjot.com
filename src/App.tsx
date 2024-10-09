@@ -196,6 +196,7 @@ export function App() {
     if (screen === Screens.SETTINGS) {
         return (
             <>
+                <AssetBrowser blogState={blogState} swarmState={swarmState} />
                 <AssetPicker blogState={blogState} />
                 <SettingsScreen blogState={blogState} swarmState={swarmState} />
             </>

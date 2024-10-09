@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Button } from '../Button'
-import { Container } from '../Container'
 import { assetPickChannel, assetPickerChannel, onConfigurationChange } from '../GlobalContext'
 import { Horizontal } from '../Horizontal'
 import { BlogState } from '../libetherjot/engine/BlogState'
 import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { MenuBar } from '../MenuBar'
 import { Setting } from '../Setting'
+import { Typography } from '../Typography'
 import { Vertical } from '../Vertical'
 
 interface Props {
@@ -76,18 +76,36 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
     return (
         <>
             <MenuBar blogState={blogState} swarmState={swarmState} />
-            <Vertical p="16px" gap={16} left>
-                <h2>Website</h2>
-                <Container>
-                    <Setting title="Browser Tab Title" value={title} onChange={setTitle} />
-                </Container>
-                <h2>Header</h2>
-                <Container>
-                    <Setting title="Title" value={headerTitle} onChange={setHeaderTitle} />
-                    <Setting title="Link Label" value={headerLinkLabel} onChange={setHeaderLinkLabel} />
-                    <Setting title="Link Address" value={headerLinkAddress} onChange={setHeaderLinkAddress} />
-                    <div>
-                        <p style={{ paddingLeft: '8px', paddingBottom: '8px' }}>Logo</p>
+            <Horizontal full gap={16} p="16px" top>
+                <Vertical p="16px" gap={16} left flex={1} color="#f0f0f0">
+                    <h2>Website</h2>
+                    <Setting
+                        title="Browser Tab Title"
+                        value={title}
+                        onChange={setTitle}
+                        hint='This is the equavilent of the "title" tag in HTML'
+                    />
+                    <h2>Header</h2>
+                    <Setting
+                        title="Title"
+                        value={headerTitle}
+                        onChange={setHeaderTitle}
+                        hint="This is the title that appears at the top of the page"
+                    />
+                    <Setting
+                        title="Link Label"
+                        value={headerLinkLabel}
+                        onChange={setHeaderLinkLabel}
+                        hint="Also requires Link Address"
+                    />
+                    <Setting
+                        title="Link Address"
+                        value={headerLinkAddress}
+                        onChange={setHeaderLinkAddress}
+                        hint="Also requires Link Label"
+                    />
+                    <Vertical gap={4} left>
+                        <Typography>Logo</Typography>
                         {headerLogo && (
                             <div>
                                 <img
@@ -97,38 +115,38 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                             </div>
                         )}
                         <Button onClick={() => assetPickerChannel.publish(true)}>Pick</Button>
-                    </div>
+                    </Vertical>
                     <Setting
                         title="Description"
                         type="textarea"
                         value={headerDescription}
                         onChange={setHeaderDescription}
+                        hint="This is the description that appears below the title"
                     />
-                </Container>
-                <h2>Front page</h2>
-                <Container>
-                    <Setting title="Highlight" value={mainHighlight} onChange={setMainHighlight} />
-                </Container>
-                <h2>Footer</h2>
-                <Container>
+                </Vertical>
+                <Vertical p="16px" gap={16} left flex={1} color="#f0f0f0">
+                    <h2>Front page</h2>
+                    <Setting
+                        title="Highlight"
+                        value={mainHighlight}
+                        onChange={setMainHighlight}
+                        hint="This is a category that will be highlighted on the front page"
+                    />
+                    <h2>Footer</h2>
                     <Setting
                         title="Description"
                         type="textarea"
                         value={footerDescription}
                         onChange={setFooterDescription}
+                        hint="This is the description that appears at the bottom of the page"
                     />
-                </Container>
-                <h2>Social Links</h2>
-                <Container>
-                    <Setting title="Discord" value={footerDiscord} onChange={setFooterDiscord} />
-                    <Setting title="Twitter" value={footerTwitter} onChange={setFooterTwitter} />
-                    <Setting title="GitHub" value={footerGitHub} onChange={setFooterGitHub} />
-                    <Setting title="YouTube" value={footerYouTube} onChange={setFooterYouTube} />
-                    <Setting title="Reddit" value={footerReddit} onChange={setFooterReddit} />
-                </Container>
-                <h2>Extensions</h2>
-                <Container>
-                    <Setting title="Ethereum Address" value={ethereumAddress} onChange={setEthereumAddress} />
+                    <h2>Extensions</h2>
+                    <Setting
+                        title="Ethereum Address"
+                        value={ethereumAddress}
+                        onChange={setEthereumAddress}
+                        hint="This is the Ethereum address that will be used for donations"
+                    />
                     <Horizontal gap={8}>
                         <input
                             onChange={event => setDonations(event.target.checked)}
@@ -145,14 +163,20 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                         />
                         Enable comments
                     </Horizontal>
-                </Container>
-                <h2>FDP Storage</h2>
-                <Container>
+                </Vertical>
+                <Vertical p="16px" gap={16} left flex={1} color="#f0f0f0">
+                    <h2>Social Links</h2>
+                    <Setting title="Discord" value={footerDiscord} onChange={setFooterDiscord} />
+                    <Setting title="Twitter" value={footerTwitter} onChange={setFooterTwitter} />
+                    <Setting title="GitHub" value={footerGitHub} onChange={setFooterGitHub} />
+                    <Setting title="YouTube" value={footerYouTube} onChange={setFooterYouTube} />
+                    <Setting title="Reddit" value={footerReddit} onChange={setFooterReddit} />
+                    <h2>FDP Storage</h2>
                     <Setting title="Sepolia JSON RPC" value={sepolia} onChange={setSepolia} />
-                </Container>
-                <h2>Apply changes</h2>
-                <Button onClick={onSave}>Save</Button>
-            </Vertical>
+                    <h2>Apply changes</h2>
+                    <Button onClick={onSave}>Save</Button>
+                </Vertical>
+            </Horizontal>
         </>
     )
 }
