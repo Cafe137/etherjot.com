@@ -1,25 +1,30 @@
 import { Binary, Strings, Types } from 'cafe-utility'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
+import { assetBrowserChannel, onAssetAdded } from '../GlobalContext'
 import { Modal } from '../Modal'
-import { save } from '../Saver'
 import { swalDirectories } from '../account/SwalFiles'
 import { swalLogin } from '../account/SwalLogin'
 import { swalPods } from '../account/SwalPods'
 import { makeFdp } from '../io/FdpMaker'
-import { GlobalState } from '../libetherjot'
+import { BlogState } from '../libetherjot/engine/BlogState'
+import { SwarmState } from '../libetherjot/engine/SwarmState'
 import './AssetBrowser.css'
 import { Thumbnail } from './Thumbnail'
 
 interface Props {
-    globalState: GlobalState
-    setGlobalState: (state: GlobalState) => void
-    setShowAssetBrowser: (show: boolean) => void
-    insertAsset: (reference: string) => void
+    blogState: BlogState
+    swarmState: SwarmState
 }
 
-export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser, insertAsset }: Props) {
-    const [_, rerender] = useState(0)
+export function AssetBrowser({ blogState, swarmState }: Props) {
+    const [visible, setVisible] = useState(false)
+
+    useEffect(() => {
+        return assetBrowserChannel.subscribe(visible => {
+            setVisible(visible)
+        })
+    }, [])
 
     async function onNewAsset() {
         await Swal.fire({
@@ -54,15 +59,13 @@ export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser,
                         imageAlt: 'The uploaded picture',
                         didOpen: async () => {
                             Swal.showLoading()
-                            const hash = await (await globalState.swarm.newRawData(byteArray, contentType)).save()
-                            globalState.assets.push({
+                            const hash = await (await swarmState.swarm.newRawData(byteArray, contentType)).save()
+                            onAssetAdded.publish({
                                 reference: hash,
                                 contentType,
                                 name: result.name
                             })
-                            await save(globalState)
                             Swal.close()
-                            setGlobalState({ ...globalState })
                         }
                     })
                 }
@@ -73,11 +76,11 @@ export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser,
 
     async function onImportAsset() {
         ;(await swalLogin()).ifPresent(async credentials => {
-            ;(await swalPods(globalState, credentials)).ifPresent(async pod => {
-                ;(await swalDirectories(globalState, credentials, pod)).ifPresent(async fullPath => {
+            ;(await swalPods(swarmState, blogState, credentials)).ifPresent(async pod => {
+                ;(await swalDirectories(swarmState, blogState, credentials, pod)).ifPresent(async fullPath => {
                     Swal.fire('Importing files...')
                     Swal.showLoading()
-                    const fdp = await makeFdp(globalState)
+                    const fdp = await makeFdp(swarmState, blogState)
                     await fdp.account.login(credentials.username, credentials.password)
                     const files = await fdp.directory.read(pod, fullPath)
                     for (const file of files.files) {
@@ -92,15 +95,13 @@ export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser,
                         if (Types.isWebp(byteArray)) {
                             contentType = 'image/webp'
                         }
-                        const hash = await (await globalState.swarm.newRawData(byteArray, contentType)).save()
-                        globalState.assets.push({
+                        const hash = await (await swarmState.swarm.newRawData(byteArray, contentType)).save()
+                        onAssetAdded.publish({
                             reference: hash,
                             contentType,
                             name: file.name
                         })
                     }
-                    await save(globalState)
-                    setGlobalState({ ...globalState })
                     Swal.hideLoading()
                     Swal.close()
                 })
@@ -108,10 +109,14 @@ export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser,
         })
     }
 
+    if (!visible) {
+        return null
+    }
+
     return (
         <Modal
             title="Asset Browser"
-            onClose={() => setShowAssetBrowser(false)}
+            onClose={() => setVisible(false)}
             action={{
                 label: 'Add New',
                 callback: onNewAsset
@@ -125,15 +130,8 @@ export function AssetBrowser({ globalState, setGlobalState, setShowAssetBrowser,
                 <p>Click on an image to insert it in the article.</p>
             </div>
             <div className="thumbnail-container">
-                {globalState.assets.map(x => (
-                    <Thumbnail
-                        globalState={globalState}
-                        key={x.reference}
-                        name={x.name}
-                        reference={x.reference}
-                        insertAsset={insertAsset}
-                        rerender={rerender}
-                    />
+                {blogState.assets.map(x => (
+                    <Thumbnail key={x.reference} name={x.name} reference={x.reference} />
                 ))}
             </div>
         </Modal>

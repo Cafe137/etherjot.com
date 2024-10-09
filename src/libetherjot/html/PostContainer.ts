@@ -1,19 +1,19 @@
 import { Arrays } from 'cafe-utility'
-import { Article, GlobalState } from '../engine/GlobalState'
+import { Article, BlogState } from '../engine/BlogState'
 import { createPost } from './Post'
 
-export function createPostContainer(globalState: GlobalState, depth: number, filter?: string): string {
+export function createPostContainer(blogState: BlogState, depth: number, filter?: string): string {
     if (filter) {
-        const articles = globalState.articles.filter(x => x.category === filter || x.tags.includes(filter))
+        const articles = blogState.articles.filter(x => x.category === filter || x.tags.includes(filter))
         return `
             <div class="post-container post-container-regular">
-                ${articles.map(x => buildArticle(globalState, x, 'regular', depth)).join('\n')}
+                ${articles.map(x => buildArticle(blogState, x, 'regular', depth)).join('\n')}
             </div>
         `
     }
-    if (globalState.configuration.main.highlight) {
-        const highlight = globalState.configuration.main.highlight
-        for (const article of globalState.articles) {
+    if (blogState.configuration.main.highlight) {
+        const highlight = blogState.configuration.main.highlight
+        for (const article of blogState.articles) {
             if (article.kind !== 'regular') {
                 continue
             }
@@ -30,39 +30,39 @@ export function createPostContainer(globalState: GlobalState, depth: number, fil
         regular: 12
     }
     const articles = Arrays.organiseWithLimits(
-        globalState.articles,
+        blogState.articles,
         limits,
         'kind',
         'regular',
         (a, b) => b.createdAt - a.createdAt
     )
-    const innerHtmlH1 = `${articles.h1.map(x => buildArticle(globalState, x, 'h1', depth)).join('\n')}`
+    const innerHtmlH1 = `${articles.h1.map(x => buildArticle(blogState, x, 'h1', depth)).join('\n')}`
     const innerHtmlRegular1 = `${articles.regular
         .slice(0, 4)
-        .map(x => buildArticle(globalState, x, 'regular', depth))
+        .map(x => buildArticle(blogState, x, 'regular', depth))
         .join('\n')}`
-    const innerHtmlH2 = `${articles.h2.map(x => buildArticle(globalState, x, 'h2', depth)).join('\n')}`
+    const innerHtmlH2 = `${articles.h2.map(x => buildArticle(blogState, x, 'h2', depth)).join('\n')}`
     const innerHtmlHighlight = `${articles.highlight
-        .map(x => buildArticle(globalState, x, 'highlight', depth))
+        .map(x => buildArticle(blogState, x, 'highlight', depth))
         .join('\n')}`
     const innerHtmlRegular2 = `${articles.regular
         .slice(4, 12)
-        .map(x => buildArticle(globalState, x, 'regular', depth))
+        .map(x => buildArticle(blogState, x, 'regular', depth))
         .join('\n')}`
     return `
         ${innerHtmlH1 ? `<div class="post-container-h1">${innerHtmlH1}</div>` : ''}
-        ${maybeSurround(globalState, innerHtmlRegular1, 'regular')}
-        ${maybeSurround(globalState, innerHtmlH2, 'h2')}
-        ${maybeSurround(globalState, innerHtmlHighlight, 'highlight')}
-        ${maybeSurround(globalState, innerHtmlRegular2, 'regular')}
+        ${maybeSurround(blogState, innerHtmlRegular1, 'regular')}
+        ${maybeSurround(blogState, innerHtmlH2, 'h2')}
+        ${maybeSurround(blogState, innerHtmlHighlight, 'highlight')}
+        ${maybeSurround(blogState, innerHtmlRegular2, 'regular')}
     `
 }
 
-function maybeSurround(globalState: GlobalState, string: string, kind: string): string {
+function maybeSurround(blogState: BlogState, string: string, kind: string): string {
     if (string && kind === 'highlight') {
         return `
             <div class="highlight">
-                <h2>${globalState.configuration.main?.highlight}</h2>
+                <h2>${blogState.configuration.main?.highlight}</h2>
                 <div class="post-container post-container-${kind}">
                     ${string}
                 </div>
@@ -72,13 +72,13 @@ function maybeSurround(globalState: GlobalState, string: string, kind: string): 
 }
 
 function buildArticle(
-    globalState: GlobalState,
+    blogState: BlogState,
     x: Article,
     as: 'h1' | 'h2' | 'highlight' | 'regular',
     depth: number
 ): string {
     return createPost(
-        globalState,
+        blogState,
         x.title,
         x.preview,
         x.category,

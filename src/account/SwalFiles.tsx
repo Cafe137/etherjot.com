@@ -1,7 +1,8 @@
 import { Optional } from 'cafe-utility'
 import Swal from 'sweetalert2'
 import { getFiles } from '../io/LoadSave'
-import { GlobalState } from '../libetherjot'
+import { BlogState } from '../libetherjot/engine/BlogState'
+import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { Credentials } from '../type/Credentials'
 
 interface Directory {
@@ -21,10 +22,16 @@ function addOptions(to: Record<string, string>, from: Directory, directoriesOnly
     }
 }
 
-export async function swalDirectories(globalState: GlobalState, credentials: Credentials, pod: string, prefix = '') {
+export async function swalDirectories(
+    swarmState: SwarmState,
+    blogState: BlogState,
+    credentials: Credentials,
+    pod: string,
+    prefix = ''
+) {
     Swal.fire('Getting files...')
     Swal.showLoading()
-    const files = await getFiles(globalState, credentials, pod, prefix)
+    const files = await getFiles(swarmState, blogState, credentials, pod, prefix)
     Swal.hideLoading()
     Swal.close()
     const inputOptions: Record<string, string> = {}
@@ -47,14 +54,15 @@ export async function swalDirectories(globalState: GlobalState, credentials: Cre
 }
 
 export async function swalFiles(
-    globalState: GlobalState,
+    swarmState: SwarmState,
+    blogState: BlogState,
     credentials: Credentials,
     pod: string,
     prefix = ''
 ): Promise<Optional<string>> {
     Swal.fire('Getting files...')
     Swal.showLoading()
-    const files = await getFiles(globalState, credentials, pod, prefix)
+    const files = await getFiles(swarmState, blogState, credentials, pod, prefix)
     Swal.hideLoading()
     Swal.close()
     const inputOptions: Record<string, string> = {}
@@ -70,7 +78,7 @@ export async function swalFiles(
         return Optional.empty()
     }
     if (files.directories.some(x => x.name === result.value)) {
-        return swalFiles(globalState, credentials, pod, `${prefix}/${result.value}`)
+        return swalFiles(swarmState, blogState, credentials, pod, `${prefix}/${result.value}`)
     }
     let fullPath = `${prefix}/${result.value}`
     while (fullPath.startsWith('//')) {

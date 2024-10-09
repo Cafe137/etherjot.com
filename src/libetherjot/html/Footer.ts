@@ -1,5 +1,5 @@
 import { Strings } from 'cafe-utility'
-import { GlobalState } from '../engine/GlobalState'
+import { BlogState } from '../engine/BlogState'
 import { createDiscordSvg } from './DiscordSvg'
 import { createGithubSvg } from './GithubSvg'
 import { createHomeSvg } from './HomeSvg'
@@ -8,17 +8,17 @@ import { createSwarmSvg } from './SwarmSvg'
 import { createTwitterSvg } from './TwitterSvg'
 import { createYoutubeSvg } from './YoutubeSvg'
 
-export async function createFooter(globalState: GlobalState, depth: number) {
-    const footer = globalState.configuration.footer
+export async function createFooter(blogState: BlogState) {
+    const footer = blogState.configuration.footer
     const descriptionHtml = footer.description ? `<p class="footer-description">${footer.description}</p>` : ''
     const discordHtml = footer.links.discord ? createLinkSvg(createDiscordSvg(), 'Discord', footer.links.discord) : ''
     const githubHtml = footer.links.github ? createLinkSvg(createGithubSvg(), 'GitHub', footer.links.github) : ''
     const twitterHtml = footer.links.twitter ? createLinkSvg(createTwitterSvg(), 'Twitter', footer.links.twitter) : ''
     const redditHtml = footer.links.reddit ? createLinkSvg(createRedditSvg(), 'Reddit', footer.links.reddit) : ''
     const youtubeHtml = footer.links.youtube ? createLinkSvg(createYoutubeSvg(), 'YouTube', footer.links.youtube) : ''
-    const linkHtml = globalState.configuration.header.linkAddress
+    const linkHtml = blogState.configuration.header.linkAddress
         ? `${Strings.resolveMarkdownLinks(
-              globalState.configuration.header.linkAddress,
+              blogState.configuration.header.linkAddress,
               (_, link) => `<a class="footer-link" href="${link}" target="_blank">${createHomeSvg()} Visit website</a>`
           )}`
         : ''

@@ -1,7 +1,9 @@
 import { Strings } from 'cafe-utility'
+import { parse } from 'marked'
+import { Article, BlogState } from '../engine/BlogState'
 import { ParsedMarkdown } from '../engine/FrontMatter'
-import { Article, GlobalState } from '../engine/GlobalState'
 import { preprocess } from '../engine/Preprocessor'
+import { SwarmState } from '../engine/SwarmState'
 import { createArticleSlug } from '../engine/Utility'
 import { createCommentSystem } from '../html/Comment'
 import { createDonationButton } from '../html/Donation'
@@ -16,30 +18,30 @@ import { createTagCloud } from '../html/TagCloud'
 import { createTwitterSvg } from '../html/TwitterSvg'
 
 export async function createArticlePage(
+    swarmState: SwarmState,
+    blogState: BlogState,
     title: string,
     markdown: ParsedMarkdown,
-    globalState: GlobalState,
     category: string,
     tags: string[],
     banner: string,
     date: string,
     commentsFeed: string,
-    kind: 'regular' | 'h1' | 'h2' | 'highlight',
-    parseFn: (markdown: string) => string
+    kind: 'regular' | 'h1' | 'h2' | 'highlight'
 ): Promise<Article> {
-    const processedArticle = await preprocess(parseFn(markdown.body))
+    const processedArticle = await preprocess(parse(markdown.body))
     const sidebarPublishedHtml = tags.length
         ? `<div class="article-sidebar-block"><h3>Published in:</h3><div class="tag-cloud">${createTagCloud(
               tags,
               2
           )}</div></div>`
         : ``
-    const relatedArticlesHtml = createRelatedArticles(globalState, title, tags, 2)
+    const relatedArticlesHtml = createRelatedArticles(blogState, title, tags, 2)
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}`
-    const bannerAsset = banner ? globalState.assets.find(x => x.reference === banner) : null
+    const head = `<title>${title} | ${blogState.configuration.title}</title>${createStyleSheet(2)}`
+    const bannerAsset = banner ? blogState.assets.find(x => x.reference === banner) : null
     const bannerSrc = bannerAsset ? '../'.repeat(2) + bannerAsset.name : '../'.repeat(2) + 'default.png'
     const bannerHtml = `<div class="content-area onpage-banner">
                 <img src="${bannerSrc}" class="banner" />
@@ -50,7 +52,7 @@ export async function createArticlePage(
         exclusive: true
     })
     for (const block of imageBlocks) {
-        const asset = globalState.assets.find(x => x.reference === block)
+        const asset = blogState.assets.find(x => x.reference === block)
         if (asset) {
             processedArticle.html = processedArticle.html.replaceAll(
                 `"http://localhost:1633/bytes/${block}"`,
@@ -59,7 +61,7 @@ export async function createArticlePage(
         }
     }
     const body = `
-    ${await createHeader(globalState, 2, 'Latest', 'p')}
+    ${await createHeader(blogState, 2, 'Latest', 'p')}
     <main>
         <article>
             <div class="content-area grid-container">
@@ -99,21 +101,21 @@ export async function createArticlePage(
                 <div class="grid-6">
                     ${processedArticle.html}
                     ${
-                        globalState.configuration.extensions.donations &&
-                        globalState.configuration.extensions.ethereumAddress
+                        blogState.configuration.extensions.donations &&
+                        blogState.configuration.extensions.ethereumAddress
                             ? await createDonationButton(
-                                  globalState.configuration.extensions.ethereumAddress,
-                                  await globalState.swarm.mustGetUsableStamp()
+                                  blogState.configuration.extensions.ethereumAddress,
+                                  swarmState.postageBatchId
                               )
                             : ''
                     }
-                    ${globalState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
+                    ${blogState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
                 </div>
             </div>
         </article>
         ${readMoreHtml}
     </main>
-    ${await createFooter(globalState, 2)}
+    ${await createFooter(blogState)}
     <script>
         const shareLink = document.getElementById('share-link')
         const shareTwitter = document.getElementById('share-twitter')
@@ -141,10 +143,8 @@ export async function createArticlePage(
     </script>`
     const year = new Date(date).getFullYear()
     const html = await createHtml5(head, body, 2)
-    const markdownHandle = await (
-        await globalState.swarm.newResource('index.md', markdown.body, 'text/markdown')
-    ).save()
-    const htmlHash = await (await globalState.swarm.newRawData(html, 'text/html')).save()
+    const markdownHandle = await (await swarmState.swarm.newResource('index.md', markdown.body, 'text/markdown')).save()
+    const htmlHash = await (await swarmState.swarm.newRawData(html, 'text/html')).save()
     const path = `${category}/${year}/${createArticleSlug(title)}`
     return {
         title,
@@ -158,6 +158,6 @@ export async function createArticlePage(
         path,
         createdAt: new Date(date).getTime(),
         commentsFeed,
-        stamp: await globalState.swarm.mustGetUsableStamp()
+        stamp: await swarmState.swarm.mustGetUsableStamp()
     }
 }

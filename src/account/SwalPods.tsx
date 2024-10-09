@@ -1,13 +1,18 @@
 import { Optional } from 'cafe-utility'
 import Swal from 'sweetalert2'
 import { getPods } from '../io/LoadSave'
-import { GlobalState } from '../libetherjot'
+import { BlogState } from '../libetherjot/engine/BlogState'
+import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { Credentials } from '../type/Credentials'
 
-export async function swalPods(globalState: GlobalState, credentials: Credentials): Promise<Optional<string>> {
+export async function swalPods(
+    swarmState: SwarmState,
+    blogState: BlogState,
+    credentials: Credentials
+): Promise<Optional<string>> {
     Swal.fire('Getting pods...')
     Swal.showLoading()
-    const pods = await getPods(globalState, credentials)
+    const pods = await getPods(swarmState, blogState, credentials)
     Swal.hideLoading()
     const inputOptions: Record<string, string> = {}
     for (const pod of pods) {

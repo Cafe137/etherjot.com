@@ -1,17 +1,19 @@
-import { Asset, GlobalState } from './GlobalState'
+import { Asset, BlogState } from './BlogState'
+import { SwarmState } from './SwarmState'
 
 export async function addAsset(
-    globalState: GlobalState,
+    swarmState: SwarmState,
+    blogState: BlogState,
     name: string,
     byteArray: Uint8Array,
     contentType: string
 ): Promise<Asset> {
-    const hash = await (await globalState.swarm.newResource('upload', byteArray, contentType)).save()
+    const hash = await (await swarmState.swarm.newResource('upload', byteArray, contentType)).save()
     const asset = {
         reference: hash.hash,
         contentType,
         name
     }
-    globalState.assets.push(asset)
+    blogState.assets.push(asset)
     return asset
 }

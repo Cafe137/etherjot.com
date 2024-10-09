@@ -3,50 +3,51 @@ import { createFavicon } from '../html/Favicon'
 import { createArticleFontData, createBrandingFontData, createNormalFontData } from '../html/Font'
 import { createStyle } from '../html/Style'
 import { createFrontPage } from '../page/FrontPage'
-import { GlobalState } from './GlobalState'
+import { BlogState } from './BlogState'
+import { SwarmState } from './SwarmState'
 import { createArticleSlug } from './Utility'
 
-export async function recreateMantaray(globalState: GlobalState): Promise<void> {
-    const collection = await globalState.swarm.newCollection()
+export async function recreateMantaray(swarmState: SwarmState, blogState: BlogState): Promise<void> {
+    const collection = await swarmState.swarm.newCollection()
     await collection.addRawData(
         'font-variant-1.ttf',
-        await globalState.swarm.newRawData(createBrandingFontData(), 'font/ttf')
+        await swarmState.swarm.newRawData(createBrandingFontData(), 'font/ttf')
     )
     await collection.addRawData(
         'font-variant-2.woff2',
-        await globalState.swarm.newRawData(createNormalFontData(), 'font/woff2')
+        await swarmState.swarm.newRawData(createNormalFontData(), 'font/woff2')
     )
     await collection.addRawData(
         'font-variant-3.ttf',
-        await globalState.swarm.newRawData(createArticleFontData(), 'font/ttf')
+        await swarmState.swarm.newRawData(createArticleFontData(), 'font/ttf')
     )
-    await collection.addRawData('style.css', await globalState.swarm.newRawData(createStyle(), 'text/css'))
-    await collection.addRawData('default.png', await globalState.swarm.newRawData(createDefaultImage(), 'image/png'))
-    await collection.addRawData('favicon.png', await globalState.swarm.newRawData(createFavicon(), 'image/png'))
-    await collection.addRawData('/', await createFrontPage(globalState))
-    await collection.addRawData('index.html', await createFrontPage(globalState))
-    for (const page of globalState.pages) {
-        await collection.addHandle(page.path, await globalState.swarm.newHandle(page.path, page.html, 'text/html'))
+    await collection.addRawData('style.css', await swarmState.swarm.newRawData(createStyle(), 'text/css'))
+    await collection.addRawData('default.png', await swarmState.swarm.newRawData(createDefaultImage(), 'image/png'))
+    await collection.addRawData('favicon.png', await swarmState.swarm.newRawData(createFavicon(), 'image/png'))
+    await collection.addRawData('/', await createFrontPage(swarmState, blogState))
+    await collection.addRawData('index.html', await createFrontPage(swarmState, blogState))
+    for (const page of blogState.pages) {
+        await collection.addHandle(page.path, await swarmState.swarm.newHandle(page.path, page.html, 'text/html'))
     }
-    for (const article of globalState.articles) {
+    for (const article of blogState.articles) {
         await collection.addHandle(
             article.path,
-            await globalState.swarm.newHandle(article.path, article.html, 'text/html')
+            await swarmState.swarm.newHandle(article.path, article.html, 'text/html')
         )
     }
-    for (const collectionPage of Object.keys(globalState.collections)) {
+    for (const collectionPage of Object.keys(blogState.collections)) {
         await collection.addHandle(
             createArticleSlug(collectionPage),
-            await globalState.swarm.newHandle(collectionPage, globalState.collections[collectionPage], 'text/html')
+            await swarmState.swarm.newHandle(collectionPage, blogState.collections[collectionPage], 'text/html')
         )
     }
-    for (const asset of globalState.assets) {
+    for (const asset of blogState.assets) {
         await collection.addHandle(
             asset.name,
-            await globalState.swarm.newHandle(asset.name, asset.reference, asset.contentType)
+            await swarmState.swarm.newHandle(asset.name, asset.reference, asset.contentType)
         )
     }
     await collection.save()
-    const website = await globalState.swarm.newWebsite(globalState.wallet.privateKey, collection)
+    const website = await swarmState.swarm.newWebsite(blogState.wallet.privateKey, collection)
     await website.publish()
 }

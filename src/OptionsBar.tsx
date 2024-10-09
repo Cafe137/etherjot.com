@@ -1,59 +1,94 @@
-import { Optional, Strings } from 'cafe-utility'
-import { parse } from 'marked'
-import { useState } from 'react'
+import { Arrays, Dates, Strings } from 'cafe-utility'
+import { useEffect, useState } from 'react'
 import { Button } from './Button'
-import { Article, Asset, GlobalState, createArticlePage, parseMarkdown } from './libetherjot'
-import { save } from './Saver'
+import {
+    ArticleEdit,
+    assetPickChannel,
+    assetPickerChannel,
+    onArticleBeginEdit,
+    onArticleCreate,
+    onArticleEdit,
+    onArticleReset,
+    onArticleSuccess,
+    onSaveToDrive,
+    onSaveToDriveRequest,
+    onSaveToLocal,
+    onSaveToLocalRequest
+} from './GlobalContext'
 import './Sidebar.css'
 import { TextInput } from './TextInput'
 import { Typography } from './Typography'
 import { Vertical } from './Vertical'
+import { parseMarkdown } from './libetherjot/engine/FrontMatter'
 
 interface Props {
-    globalState: GlobalState
     articleContent: string
-    articleTitle: string
-    setArticleTitle: (title: string) => void
-    articleBanner: string | null
-    setArticleBanner: (banner: string | null) => void
-    articleCategory: string
-    setArticleCategory: (category: string) => void
-    articleTags: string
-    setArticleTags: (tags: string) => void
-    editing: Article | false
-    setEditing: (editing: Article | false) => void
-    articleType: 'regular' | 'h1' | 'h2'
-    setArticleType: (type: 'regular' | 'h1' | 'h2') => void
-    commentsFeed: string
-    articleDate: string
-    setArticleDate: (date: string) => void
-    setShowAssetPicker: (show: boolean) => void
-    setAssetPickerCallback: (callback: (asset: Optional<Asset>) => void) => void
 }
 
-export function OptionsBar({
-    globalState,
-    articleContent,
-    articleTitle,
-    setArticleTitle,
-    articleBanner,
-    setArticleBanner,
-    articleCategory,
-    setArticleCategory,
-    articleTags,
-    setArticleTags,
-    editing,
-    setEditing,
-    articleType,
-    setArticleType,
-    commentsFeed,
-    articleDate,
-    setArticleDate,
-    setShowAssetPicker,
-    setAssetPickerCallback
-}: Props) {
+export function OptionsBar({ articleContent }: Props) {
     const [loading, setLoading] = useState(false)
-    const markdown = parseMarkdown(articleContent)
+    const [articleTitle, setArticleTitle] = useState('')
+    const [articleBanner, setArticleBanner] = useState<string | null>(null)
+    const [articleCategory, setArticleCategory] = useState<string>('')
+    const [articleTags, setArticleTags] = useState<string>('')
+    const [articleType, setArticleType] = useState<'regular' | 'h1' | 'h2' | 'highlight'>('regular')
+    const [articleDate, setArticleDate] = useState(Dates.isoDate())
+    const [editing, setEditing] = useState<ArticleEdit | false>(false)
+    const [commentsFeed, setCommentsFeed] = useState<string>(Strings.randomHex(40))
+
+    useEffect(() => {
+        return Arrays.multicall([
+            onArticleBeginEdit.subscribe(article => {
+                setArticleTitle(article.title)
+                setArticleCategory(article.category)
+                setArticleTags(article.tags.join(', '))
+                setArticleBanner(article.banner && article.banner !== 'default.png' ? article.banner : null)
+                setArticleDate(article.date)
+                setEditing(article)
+                setCommentsFeed(article.commentsFeed)
+                setArticleType(article.type)
+            }),
+            onSaveToDriveRequest.subscribe(() => {
+                onSaveToDrive.publish({
+                    content: articleContent,
+                    article: editing || undefined
+                })
+            }),
+            onSaveToLocalRequest.subscribe(() => {
+                onSaveToLocal.publish({
+                    content: articleContent,
+                    article: editing || undefined
+                })
+            }),
+            assetPickChannel.subscribe(asset => {
+                asset.ifPresent(a => {
+                    setArticleBanner(a.reference)
+                })
+            }),
+            onArticleSuccess.subscribe(() => {
+                setArticleTitle('')
+                setArticleCategory('')
+                setArticleTags('')
+                setArticleBanner(null)
+                setArticleDate(Dates.isoDate())
+                setEditing(false)
+                setCommentsFeed(Strings.randomHex(40))
+                setArticleType('regular')
+                setLoading(false)
+            }),
+            onArticleReset.subscribe(() => {
+                setArticleTitle('')
+                setArticleCategory('')
+                setArticleTags('')
+                setArticleBanner(null)
+                setArticleDate(Dates.isoDate())
+                setEditing(false)
+                setCommentsFeed(Strings.randomHex(40))
+                setArticleType('regular')
+                setLoading(false)
+            })
+        ])
+    }, [])
 
     async function onPublish() {
         if (!articleTitle || !articleContent) {
@@ -61,51 +96,53 @@ export function OptionsBar({
         }
         setLoading(true)
         if (editing) {
-            globalState.articles = globalState.articles.filter(x => x.html !== editing.html)
+            onArticleEdit.publish({
+                oldTitle: editing.title,
+                title: articleTitle,
+                markdown: parseMarkdown(articleContent),
+                category: articleCategory,
+                tags: articleTags
+                    .split(',')
+                    .map(x => x.trim())
+                    .filter(x => x),
+                banner: articleBanner || '',
+                date: articleDate,
+                commentsFeed,
+                type: articleType
+            })
+            setEditing(false)
+        } else {
+            onArticleCreate.publish({
+                title: articleTitle,
+                markdown: parseMarkdown(articleContent),
+                category: articleCategory,
+                tags: articleTags
+                    .split(',')
+                    .map(x => x.trim())
+                    .filter(x => x),
+                banner: articleBanner || '',
+                date: articleDate,
+                commentsFeed,
+                type: articleType
+            })
         }
-        const results = await createArticlePage(
-            articleTitle,
-            markdown,
-            globalState,
-            articleCategory,
-            articleTags
-                .split(',')
-                .map(x => Strings.shrinkTrim(x))
-                .filter(x => x),
-            articleBanner || '',
-            articleDate,
-            commentsFeed,
-            articleType,
-            parse
-        )
-        globalState.articles.push(results)
-        await save(globalState)
-        setEditing(false)
-        window.location.reload()
     }
 
     return (
         <aside className="sidebar">
+            {editing && (
+                <Vertical left gap={4}>
+                    <Typography bold>Editing:</Typography>
+                    <Typography>{editing.title}</Typography>
+                </Vertical>
+            )}
             <TextInput value={articleTitle} setter={setArticleTitle} label="Title" required />
             <TextInput value={articleCategory} setter={setArticleCategory} label="Category" required />
             <TextInput value={articleDate} setter={setArticleDate} label="Date" required />
             <Vertical left gap={4} full>
                 <Typography size={15}>Banner image</Typography>
                 {articleBanner && <img src={`http://localhost:1633/bytes/${articleBanner}`} />}
-                <Button
-                    secondary
-                    small
-                    onClick={() => {
-                        setShowAssetPicker(true)
-                        const callbackFn = (asset: Optional<Asset>) => {
-                            asset.ifPresent(a => {
-                                setArticleBanner(a.reference)
-                            })
-                            setShowAssetPicker(false)
-                        }
-                        setAssetPickerCallback(() => callbackFn)
-                    }}
-                >
+                <Button secondary small onClick={() => assetPickerChannel.publish(true)}>
                     Select
                 </Button>
             </Vertical>

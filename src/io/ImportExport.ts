@@ -3,7 +3,8 @@ import { Dates, Strings } from 'cafe-utility'
 import JSZip from 'jszip'
 import Swal from 'sweetalert2'
 import { swalLogin } from '../account/SwalLogin'
-import { Article, GlobalState, saveGlobalState } from '../libetherjot'
+import { Article, BlogState, saveBlogState } from '../libetherjot/engine/BlogState'
+import { saveSwarmState, SwarmState } from '../libetherjot/engine/SwarmState'
 import { makeFdp } from './FdpMaker'
 
 export async function articleToMarkdown(bee: Bee, article: Article): Promise<string> {
@@ -26,13 +27,13 @@ export async function onDriveImport() {
     Swal.fire('Todo')
 }
 
-export async function onDriveExport(globalState: GlobalState) {
-    const bee = new Bee(globalState.beeApi)
+export async function onDriveExport(swarmState: SwarmState, blogState: BlogState) {
+    const bee = new Bee(swarmState.beeApi)
     ;(await swalLogin()).ifPresent(async credentials => {
         Swal.fire('Connecting...')
         Swal.showLoading()
         try {
-            const fdp = await makeFdp(globalState)
+            const fdp = await makeFdp(swarmState, blogState)
             Swal.fire('Logging in...')
             Swal.showLoading()
             await fdp.account.login(credentials.username, credentials.password)
@@ -52,13 +53,18 @@ export async function onDriveExport(globalState: GlobalState) {
             Swal.showLoading()
             await fdp.file.uploadData(
                 'etherjot',
+                `/${directoryName}/swarm.json`,
+                JSON.stringify(saveSwarmState(swarmState))
+            )
+            await fdp.file.uploadData(
+                'etherjot',
                 `/${directoryName}/blog.json`,
-                JSON.stringify(await saveGlobalState(globalState))
+                JSON.stringify(saveBlogState(blogState))
             )
             Swal.fire('Creating assets directory...')
             Swal.showLoading()
             await fdp.directory.create('etherjot', `/${directoryName}/assets`)
-            for (const asset of globalState.assets) {
+            for (const asset of blogState.assets) {
                 Swal.fire(`Saving asset ${asset.name}...`)
                 Swal.showLoading()
                 await fdp.file.uploadData(
@@ -70,7 +76,7 @@ export async function onDriveExport(globalState: GlobalState) {
             Swal.fire('Creating articles directory...')
             Swal.showLoading()
             await fdp.directory.create('etherjot', `/${directoryName}/articles`)
-            for (const article of globalState.articles) {
+            for (const article of blogState.articles) {
                 Swal.fire(`Saving article ${article.title}...`)
                 Swal.showLoading()
                 const markdown = await articleToMarkdown(bee, article)
@@ -89,15 +95,17 @@ export async function onDriveExport(globalState: GlobalState) {
     })
 }
 
-export async function onExport(globalState: GlobalState) {
-    const bee = new Bee(globalState.beeApi)
-    const blogJson = JSON.stringify(await saveGlobalState(globalState))
+export async function onExport(swarmState: SwarmState, blogState: BlogState) {
+    const bee = new Bee(swarmState.beeApi)
+    const swarmJson = JSON.stringify(saveSwarmState(swarmState))
+    const blogJson = JSON.stringify(saveBlogState(blogState))
     const zip = new JSZip()
+    zip.file('swarm.json', swarmJson)
     zip.file('blog.json', blogJson)
-    for (const asset of globalState.assets) {
+    for (const asset of blogState.assets) {
         zip.file(`assets/${asset.name}`, await bee.downloadData(asset.reference))
     }
-    for (const article of globalState.articles) {
+    for (const article of blogState.articles) {
         const markdown = await articleToMarkdown(bee, article)
         zip.file(`articles/${Strings.slugify(article.title)}.md`, markdown)
     }

@@ -1,8 +1,8 @@
-import { GlobalState } from '../engine/GlobalState'
+import { BlogState } from '../engine/BlogState'
 import { createArticleSlug } from '../engine/Utility'
 
-export function createNav(globalState: GlobalState, depth: number, active: string) {
-    const categorySet = globalState.articles.reduce((categories, article) => {
+export function createNav(blogState: BlogState, depth: number, active: string) {
+    const categorySet = blogState.articles.reduce((categories, article) => {
         categories.add(article.category)
         return categories
     }, new Set<string>())

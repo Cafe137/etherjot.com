@@ -1,99 +1,60 @@
-import { Bee } from '@ethersphere/bee-js'
-import { Strings } from 'cafe-utility'
 import Swal from 'sweetalert2'
-import { DEFAULT_CONTENT } from './Constants'
+import {
+    assetBrowserChannel,
+    onArticleReset,
+    onBlogReset,
+    onSaveToDriveRequest,
+    onSaveToLocalRequest,
+    screenChannel
+} from './GlobalContext'
 import { Horizontal } from './Horizontal'
 import { onDriveExport, onDriveImport, onExport, onImport } from './io/ImportExport'
-import { loadFromDrive, saveAsMarkdown, saveToDrive } from './io/LoadSave'
-import { Article, GlobalState } from './libetherjot'
+import { loadFromDrive } from './io/LoadSave'
+import { BlogState } from './libetherjot/engine/BlogState'
+import { SwarmState } from './libetherjot/engine/SwarmState'
 import { MenuItem } from './MenuItem'
+import { Screens } from './Navigation'
 import { SquareImage } from './SquareImage'
 import { Typography } from './Typography'
 
 interface Props {
-    globalState: GlobalState
-    setTab: (tab: string) => void
-    articleContent: string
-    isBeeRunning: boolean
-    hasPostageStamp: boolean
-    setArticleContent: (content: string) => void
-    setArticleTitle: (title: string) => void
-    setArticleBanner: (banner: string | null) => void
-    setArticleCategory: (category: string) => void
-    setArticleTags: (tags: string) => void
-    setArticleCommentsFeed: (commentsFeed: string) => void
-    setArticleType: (type: 'regular' | 'h1' | 'h2') => void
-    editing: Article | false
-    setEditing: (editing: Article | false) => void
-    setShowAssetBrowser: (show: boolean) => void
+    blogState: BlogState
+    swarmState: SwarmState
 }
 
-export function MenuBar({
-    globalState,
-    setTab,
-    articleContent,
-    isBeeRunning,
-    hasPostageStamp,
-    setArticleContent,
-    setArticleTitle,
-    setArticleBanner,
-    setArticleCategory,
-    setArticleCommentsFeed,
-    setArticleType,
-    editing,
-    setEditing,
-    setShowAssetBrowser
-}: Props) {
-    async function onSettings() {
-        if (articleContent !== DEFAULT_CONTENT) {
-            const confirmed = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'You will lose unsaved changes',
-                showCancelButton: true
-            })
-            if (!confirmed.isConfirmed) {
-                return
-            }
-        }
-        setTab('global-settings')
+export function MenuBar({ blogState, swarmState }: Props) {
+    function onSettings() {
+        screenChannel.publish(Screens.SETTINGS)
     }
 
     async function onNewArticle() {
-        if (articleContent !== DEFAULT_CONTENT) {
-            const confirmed = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'You will lose unsaved changes',
-                showCancelButton: true
-            })
-            if (!confirmed.isConfirmed) {
-                return
-            }
+        const confirmed = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will lose unsaved changes',
+            showCancelButton: true
+        })
+        if (!confirmed.isConfirmed) {
+            return
         }
-        setEditing(false)
-        setArticleContent(DEFAULT_CONTENT)
-        setArticleTitle('')
-        setArticleBanner(null)
-        setArticleCategory('')
-        setArticleCommentsFeed(Strings.randomHex(40))
-        setTab('new-post')
-        setArticleType('regular')
+        screenChannel.publish(Screens.EDITOR)
+        onArticleReset.publish()
     }
 
     function onGoToBlog() {
-        const url = `http://localhost:1633/bzz/${globalState.feed}/`
+        const url = `http://localhost:1633/bzz/${blogState.feed}/`
         window.open(url, '_blank')
     }
 
     function onViewSwarmHash() {
         Swal.fire({
             title: 'Swarm Hash',
-            text: globalState.feed,
+            text: blogState.feed,
             icon: 'info'
         })
     }
 
     function onShowAssetBrowser() {
-        setShowAssetBrowser(true)
+        assetBrowserChannel.publish(true)
     }
 
     async function onReset() {
@@ -113,20 +74,19 @@ export function MenuBar({
         if (!confirmedAgain.isConfirmed) {
             return
         }
-        localStorage.clear()
-        window.location.reload()
+        onBlogReset.publish()
     }
 
     async function onSaveAsMarkdown() {
-        await saveAsMarkdown(new Bee(globalState.beeApi), articleContent, editing || undefined)
+        onSaveToLocalRequest.publish()
     }
 
     async function onSaveToDrive() {
-        await saveToDrive(globalState, articleContent, editing || undefined)
+        onSaveToDriveRequest.publish()
     }
 
     async function onLoadFromDrive() {
-        await loadFromDrive(globalState, setArticleContent)
+        await loadFromDrive(swarmState, blogState)
     }
 
     return (
@@ -154,9 +114,9 @@ export function MenuBar({
                 <MenuItem
                     name="Data"
                     actions={[
-                        { name: 'Export as zip', onClick: () => onExport(globalState) },
+                        { name: 'Export as zip', onClick: () => onExport(swarmState, blogState) },
                         { name: 'Import from zip', onClick: () => onImport() },
-                        { name: 'Export to FDP Storage', onClick: () => onDriveExport(globalState) },
+                        { name: 'Export to FDP Storage', onClick: () => onDriveExport(swarmState, blogState) },
                         { name: 'Import from FDP Storage', onClick: () => onDriveImport() }
                     ]}
                 />
@@ -164,11 +124,11 @@ export function MenuBar({
             <Horizontal gap={16} p="0px 4px">
                 <Horizontal gap={2}>
                     <Typography size={14}>Bee</Typography>
-                    <SquareImage size={14} src={isBeeRunning ? './assets/yes.png' : './assets/no.png'} />
+                    <SquareImage size={14} src={true ? './assets/yes.png' : './assets/no.png'} />
                 </Horizontal>
                 <Horizontal gap={2}>
                     <Typography size={14}>Stamp</Typography>
-                    <SquareImage size={14} src={hasPostageStamp ? './assets/yes.png' : './assets/no.png'} />
+                    <SquareImage size={14} src={true ? './assets/yes.png' : './assets/no.png'} />
                 </Horizontal>
             </Horizontal>
         </Horizontal>

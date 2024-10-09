@@ -1,17 +1,14 @@
 import Swal from 'sweetalert2'
 import { Button } from '../Button'
+import { onAssetDelete, onAssetRename, onContentInsert } from '../GlobalContext'
 import { Horizontal } from '../Horizontal'
-import { GlobalState } from '../libetherjot'
 
 interface Props {
-    globalState: GlobalState
     name: string
     reference: string
-    insertAsset: (reference: string) => void
-    rerender: (callback: (x: number) => number) => void
 }
 
-export function Thumbnail({ globalState, name, reference, insertAsset, rerender }: Props) {
+export function Thumbnail({ name, reference }: Props) {
     async function onRename() {
         const newName = await Swal.fire({
             title: 'New Name',
@@ -22,8 +19,10 @@ export function Thumbnail({ globalState, name, reference, insertAsset, rerender 
         if (!newName.value) {
             return
         }
-        globalState.assets.find(x => x.reference === reference)!.name = newName.value!
-        rerender(x => x + 1)
+        onAssetRename.publish({
+            reference,
+            name: newName.value!
+        })
     }
 
     async function onDelete() {
@@ -34,8 +33,11 @@ export function Thumbnail({ globalState, name, reference, insertAsset, rerender 
         if (!confirmed.isConfirmed) {
             return
         }
-        globalState.assets = globalState.assets.filter(x => x.reference !== reference)
-        rerender(x => x + 1)
+        onAssetDelete.publish(reference)
+    }
+
+    async function onInsert() {
+        onContentInsert.publish(`\n\n![img alt here](http://localhost:1633/bytes/${reference})`)
     }
 
     return (
@@ -43,7 +45,7 @@ export function Thumbnail({ globalState, name, reference, insertAsset, rerender 
             <img className="thumbnail-image" src={`http://localhost:1633/bytes/${reference}`} />
             <p className="thumbnail-name">{name}</p>
             <Horizontal gap={8}>
-                <Button small onClick={() => insertAsset(reference)}>
+                <Button small onClick={onInsert}>
                     Insert
                 </Button>
                 <Button small onClick={onRename}>

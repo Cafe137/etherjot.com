@@ -1,13 +1,13 @@
-import { GlobalState } from '../engine/GlobalState'
+import { BlogState } from '../engine/BlogState'
 import { createImage } from './Image'
 import { createLogoSvg } from './LogoSvg'
 import { createNav } from './Nav'
 
-export async function createHeader(globalState: GlobalState, depth: number, active: string, variant = 'h1') {
-    const title = globalState.configuration.header.title || globalState.configuration.title
-    const description = globalState.configuration.header.description
-    const linkLabel = globalState.configuration.header.linkLabel
-    const linkAddress = globalState.configuration.header.linkAddress
+export async function createHeader(blogState: BlogState, depth: number, active: string, variant = 'h1') {
+    const title = blogState.configuration.header.title || blogState.configuration.title
+    const description = blogState.configuration.header.description
+    const linkLabel = blogState.configuration.header.linkLabel
+    const linkAddress = blogState.configuration.header.linkAddress
     const descriptionHtml = description ? `<p class="blog-description">${description}</p>` : ''
     const linkHtml =
         linkLabel && linkAddress
@@ -15,8 +15,8 @@ export async function createHeader(globalState: GlobalState, depth: number, acti
             <a href="${linkAddress}" target="_blank">${linkLabel}</a>
         </div>`
             : ''
-    const logo = globalState.configuration.header.logo
-        ? globalState.assets.find(x => x.reference === globalState.configuration.header.logo)
+    const logo = blogState.configuration.header.logo
+        ? blogState.assets.find(x => x.reference === blogState.configuration.header.logo)
         : null
 
     return `
@@ -34,7 +34,7 @@ export async function createHeader(globalState: GlobalState, depth: number, acti
                 </div>
             </div>
             ${descriptionHtml}
-            ${createNav(globalState, depth, active)}
+            ${createNav(blogState, depth, active)}
         </div>
     </header>`
 }

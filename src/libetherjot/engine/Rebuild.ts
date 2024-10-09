@@ -1,33 +1,39 @@
 import { createArticlePage } from '../page/ArticlePage'
 import { createMenuPage } from '../page/MenuPage'
+import { BlogState } from './BlogState'
 import { parseMarkdown } from './FrontMatter'
-import { GlobalState } from './GlobalState'
+import { SwarmState } from './SwarmState'
 
-export async function rebuildMenuPages(globalState: GlobalState, parseFn: (markdown: string) => string): Promise<void> {
-    for (const page of globalState.pages) {
-        const rawData = await globalState.swarm.downloadRawData(page.markdown, 'text/markdown')
-        const results = await createMenuPage(page.title, rawData.utf8, globalState, parseFn)
+export async function rebuildMenuPages(
+    swarmState: SwarmState,
+    blogState: BlogState,
+    parseFn: (markdown: string) => string
+): Promise<void> {
+    for (const page of blogState.pages) {
+        const rawData = await swarmState.swarm.downloadRawData(page.markdown, 'text/markdown')
+        const results = await createMenuPage(swarmState, blogState, page.title, rawData.utf8, parseFn)
         page.html = results.swarmReference
     }
 }
 
 export async function rebuildArticlePages(
-    globalState: GlobalState,
+    swarmState: SwarmState,
+    blogState: BlogState,
     parseFn: (markdown: string) => string
 ): Promise<void> {
-    for (const article of globalState.articles) {
-        const rawData = await globalState.swarm.downloadRawData(article.markdown, 'text/markdown')
+    for (const article of blogState.articles) {
+        const rawData = await swarmState.swarm.downloadRawData(article.markdown, 'text/markdown')
         const results = await createArticlePage(
+            swarmState,
+            blogState,
             article.title,
             parseMarkdown(rawData.utf8),
-            globalState,
             article.category,
             article.tags,
             article.banner,
             new Date(article.createdAt).toDateString(),
             article.commentsFeed,
-            article.kind,
-            parseFn
+            article.kind
         )
         article.html = results.html
     }

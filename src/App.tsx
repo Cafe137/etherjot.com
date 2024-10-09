@@ -1,173 +1,180 @@
-import { Bee } from '@ethersphere/bee-js'
-import { Dates, Optional, Strings } from 'cafe-utility'
+import { Arrays } from 'cafe-utility'
 import { useEffect, useState } from 'react'
+import Swal from 'sweetalert2'
 import './App.css'
 import { AssetBrowser } from './asset-browser/AssetBrowser'
 import { AssetPicker } from './asset-browser/AssetPicker'
-import { DEFAULT_CONTENT } from './Constants'
-import { GlobalSettingsPage } from './GlobalSettingsPage'
-import { Article, Asset, GlobalState, getGlobalState } from './libetherjot'
-import { MenuBar } from './MenuBar'
-import { NewPostPage } from './NewPostPage'
-import { OptionsBar } from './OptionsBar'
-import { Sidebar } from './Sidebar'
-import { WelcomePage } from './WelcomePage'
+import {
+    onArticleCreate,
+    onArticleDelete,
+    onArticleEdit,
+    onArticleSuccess,
+    onAssetAdded,
+    onAssetDelete,
+    onAssetRename,
+    onBlogCreate,
+    onBlogReset,
+    onConfigurationChange,
+    screenChannel
+} from './GlobalContext'
+import { BlogState, getBlogState, saveBlogState } from './libetherjot/engine/BlogState'
+import { recreateMantaray } from './libetherjot/engine/Mantaray'
+import { getSwarmState, SwarmState } from './libetherjot/engine/SwarmState'
+import { createArticlePage } from './libetherjot/page/ArticlePage'
+import { Screens } from './Navigation'
+import { LocalStorageKeys } from './Persistence'
+import { EditorScreen } from './screen/EditorScreen'
+import { SettingsScreen } from './screen/SettingsScreen'
+import { WelcomeScreen } from './screen/WelcomeScreen'
+import { Typography } from './Typography'
 
-function App() {
-    const [globalState, setGlobalState] = useState<GlobalState | null>(null)
-    const [isBeeRunning, setBeeRunning] = useState(false)
-    const [hasPostageStamp, setHasPostageStamp] = useState(false)
-    const [tab, setTab] = useState('new-post')
-    const [articleTitle, setArticleTitle] = useState('')
-    const [articleContent, setArticleContent] = useState(DEFAULT_CONTENT)
-    const [articleBanner, setArticleBanner] = useState<string | null>(null)
-    const [articleCategory, setArticleCategory] = useState<string>('')
-    const [articleTags, setArticleTags] = useState<string>('')
-    const [articleType, setArticleType] = useState<'regular' | 'h1' | 'h2'>('regular')
-    const [articleDate, setArticleDate] = useState(Dates.isoDate())
-    const [editing, setEditing] = useState<Article | false>(false)
-    const [commentsFeed, setCommentsFeed] = useState<string>(Strings.randomHex(40))
-    const [showAssetBrowser, setShowAssetBrowser] = useState(false)
-    const [showAssetPicker, setShowAssetPicker] = useState(false)
-    const [assetPickerCallback, setAssetPickerCallback] = useState<(asset: Optional<Asset>) => void>(() => () => {})
+export function App() {
+    const [swarmState, setSwarmState] = useState<SwarmState | null>(null)
+    const [blogState, setBlogState] = useState<BlogState | null>(null)
+    const [screen, setScreen] = useState<Screens>(Screens.WELCOME)
 
     useEffect(() => {
-        const storedState = localStorage.getItem('state')
-        if (storedState) {
-            const parsedState = JSON.parse(storedState)
-            getGlobalState(parsedState).then(setGlobalState)
-            setTab('new-post')
+        const storedSwarmState = localStorage.getItem(LocalStorageKeys.SWARM)
+        const storedBlogState = localStorage.getItem(LocalStorageKeys.BLOG)
+        let checks = 0
+        if (storedSwarmState) {
+            const parsedSwarmState = JSON.parse(storedSwarmState)
+            setSwarmState(getSwarmState(parsedSwarmState))
+            checks++
         }
+        if (storedBlogState) {
+            const parsedBlogState = JSON.parse(storedBlogState)
+            setBlogState(getBlogState(parsedBlogState))
+            checks++
+        }
+        if (checks === 2) {
+            setScreen(Screens.EDITOR)
+        }
+        return Arrays.multicall([
+            screenChannel.subscribe(newScreen => {
+                setScreen(newScreen)
+            }),
+            onBlogCreate.subscribe(() => {
+                const storedSwarmState = localStorage.getItem(LocalStorageKeys.SWARM)
+                const storedBlogState = localStorage.getItem(LocalStorageKeys.BLOG)
+                if (!storedSwarmState || !storedBlogState) {
+                    return
+                }
+                setBlogState(getBlogState(JSON.parse(storedBlogState)))
+                setSwarmState(getSwarmState(JSON.parse(storedSwarmState)))
+            })
+        ])
     }, [])
 
-    async function checkBee() {
-        fetch('http://localhost:1633/addresses')
-            .then(async () => {
-                if (!isBeeRunning) {
-                    setBeeRunning(true)
+    useEffect(() => {
+        if (!blogState || !swarmState) {
+            return
+        }
+        return Arrays.multicall([
+            onBlogReset.subscribe(() => {
+                localStorage.removeItem(LocalStorageKeys.BLOG)
+                localStorage.removeItem(LocalStorageKeys.SWARM)
+                setBlogState(null)
+                setSwarmState(null)
+                setScreen(Screens.WELCOME)
+            }),
+            onAssetAdded.subscribe(asset => {
+                blogState.assets.push(asset)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+            }),
+            onAssetRename.subscribe(({ reference, name }) => {
+                const asset = blogState.assets.find(x => x.reference === reference)
+                if (!asset) {
+                    return
                 }
-                const bee = new Bee('http://localhost:1633')
-                const stamps = await bee.getAllPostageBatch()
-                if (stamps.some(x => x.usable)) {
-                    if (!hasPostageStamp) {
-                        setHasPostageStamp(true)
-                    }
-                } else {
-                    setHasPostageStamp(false)
-                }
+                asset.name = name
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+            }),
+            onAssetDelete.subscribe(reference => {
+                blogState.assets = blogState.assets.filter(x => x.reference !== reference)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+            }),
+            onArticleCreate.subscribe(async article => {
+                const articlePage = await createArticlePage(
+                    swarmState,
+                    blogState,
+                    article.title,
+                    article.markdown,
+                    article.category,
+                    article.tags,
+                    article.banner || 'default.png',
+                    article.date,
+                    article.commentsFeed,
+                    article.type
+                )
+                blogState.articles.push(articlePage)
+                await recreateMantaray(swarmState, blogState)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+                Swal.fire('Article Created', 'The article was created successfully.', 'success')
+                onArticleSuccess.publish()
+            }),
+            onArticleEdit.subscribe(async article => {
+                blogState.articles = blogState.articles.filter(x => x.title !== article.oldTitle)
+                const articlePage = await createArticlePage(
+                    swarmState,
+                    blogState,
+                    article.title,
+                    article.markdown,
+                    article.category,
+                    article.tags,
+                    article.banner || 'default.png',
+                    article.date,
+                    article.commentsFeed,
+                    article.type
+                )
+                blogState.articles.push(articlePage)
+                await recreateMantaray(swarmState, blogState)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+                Swal.fire('Article Updated', 'The article was updated successfully.', 'success')
+                onArticleSuccess.publish()
+            }),
+            onArticleDelete.subscribe(async title => {
+                blogState.articles = blogState.articles.filter(article => article.title !== title)
+                await recreateMantaray(swarmState, blogState)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+                Swal.fire('Article Deleted', 'The article was deleted successfully.', 'success')
+            }),
+            onConfigurationChange.subscribe(configuration => {
+                blogState.configuration = configuration
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
             })
-            .catch(() => {
-                setBeeRunning(false)
-                setHasPostageStamp(false)
-            })
+        ])
+    }, [blogState])
+
+    if (screen === Screens.WELCOME || !blogState || !swarmState) {
+        return <WelcomeScreen />
     }
 
-    useEffect(() => {
-        checkBee()
-        const interval = setInterval(() => {
-            checkBee()
-        }, Dates.seconds(5))
-        return () => clearInterval(interval)
-    }, [])
-
-    if (!globalState) {
+    if (screen === Screens.EDITOR) {
         return (
-            <WelcomePage
-                setGlobalState={setGlobalState}
-                isBeeRunning={isBeeRunning}
-                hasPostageStamp={hasPostageStamp}
-            />
+            <>
+                <AssetBrowser blogState={blogState} swarmState={swarmState} />
+                <AssetPicker blogState={blogState} />
+                <EditorScreen blogState={blogState} swarmState={swarmState} />
+            </>
         )
     }
 
-    function insertAsset(reference: string) {
-        setArticleContent((y: string) => `${y}\n\n![img alt here](http://localhost:1633/bytes/${reference})`)
-        setShowAssetBrowser(false)
+    if (screen === Screens.SETTINGS) {
+        return (
+            <>
+                <AssetPicker blogState={blogState} />
+                <SettingsScreen blogState={blogState} swarmState={swarmState} />
+            </>
+        )
     }
 
-    return (
-        <>
-            {showAssetBrowser && (
-                <AssetBrowser
-                    globalState={globalState}
-                    setGlobalState={setGlobalState}
-                    setShowAssetBrowser={setShowAssetBrowser}
-                    insertAsset={insertAsset}
-                />
-            )}
-            {showAssetPicker && <AssetPicker globalState={globalState} callback={assetPickerCallback} />}
-            <MenuBar
-                globalState={globalState}
-                setTab={setTab}
-                articleContent={articleContent}
-                isBeeRunning={isBeeRunning}
-                editing={editing}
-                setEditing={setEditing}
-                hasPostageStamp={hasPostageStamp}
-                setArticleContent={setArticleContent}
-                setArticleTitle={setArticleTitle}
-                setArticleBanner={setArticleBanner}
-                setArticleCategory={setArticleCategory}
-                setShowAssetBrowser={setShowAssetBrowser}
-                setArticleTags={setArticleTags}
-                setArticleCommentsFeed={setCommentsFeed}
-                setArticleType={setArticleType}
-            />
-            <main>
-                {tab === 'new-post' && (
-                    <Sidebar
-                        globalState={globalState}
-                        setTab={setTab}
-                        editing={editing}
-                        setEditing={setEditing}
-                        articleContent={articleContent}
-                        setArticleContent={setArticleContent}
-                        setArticleTitle={setArticleTitle}
-                        setArticleBanner={setArticleBanner}
-                        setArticleCategory={setArticleCategory}
-                        setShowAssetBrowser={setShowAssetBrowser}
-                        setArticleTags={setArticleTags}
-                        setArticleCommentsFeed={setCommentsFeed}
-                        setArticleType={setArticleType}
-                    />
-                )}
-                {tab === 'new-post' && (
-                    <NewPostPage articleContent={articleContent} setArticleContent={setArticleContent} />
-                )}
-                {tab === 'global-settings' && (
-                    <GlobalSettingsPage
-                        globalState={globalState}
-                        setGlobalState={setGlobalState}
-                        setAssetPickerCallback={setAssetPickerCallback}
-                        setShowAssetPicker={setShowAssetPicker}
-                    />
-                )}
-                {tab === 'new-post' && (
-                    <OptionsBar
-                        globalState={globalState}
-                        articleContent={articleContent}
-                        articleTitle={articleTitle}
-                        setArticleTitle={setArticleTitle}
-                        articleBanner={articleBanner}
-                        setArticleBanner={setArticleBanner}
-                        articleCategory={articleCategory}
-                        setArticleCategory={setArticleCategory}
-                        articleTags={articleTags}
-                        setArticleTags={setArticleTags}
-                        editing={editing}
-                        setEditing={setEditing}
-                        commentsFeed={commentsFeed}
-                        articleType={articleType}
-                        setArticleType={setArticleType}
-                        articleDate={articleDate}
-                        setArticleDate={setArticleDate}
-                        setShowAssetPicker={setShowAssetPicker}
-                        setAssetPickerCallback={setAssetPickerCallback}
-                    />
-                )}
-            </main>
-        </>
-    )
+    return <Typography>Something went wrong.</Typography>
 }
-
-export default App

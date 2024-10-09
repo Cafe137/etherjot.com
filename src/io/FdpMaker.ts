@@ -1,13 +1,14 @@
 import { FdpStorage } from '@fairdatasociety/fdp-storage'
-import { GlobalState } from '../libetherjot'
+import { BlogState } from '../libetherjot/engine/BlogState'
+import { SwarmState } from '../libetherjot/engine/SwarmState'
 
-export async function makeFdp(globalState: GlobalState): Promise<FdpStorage> {
+export async function makeFdp(swarmState: SwarmState, blogState: BlogState): Promise<FdpStorage> {
     const fdp = new FdpStorage(
-        globalState.beeApi,
-        (globalState.postageBatchId || (await globalState.swarm.mustGetUsableStamp())) as any,
+        swarmState.beeApi,
+        (swarmState.postageBatchId || (await swarmState.swarm.mustGetUsableStamp())) as any,
         {
             ensOptions: {
-                rpcUrl: globalState.configuration.sepolia,
+                rpcUrl: blogState.configuration.sepolia,
                 contractAddresses: {
                     ensRegistry: '0x42a96D45d787685ac4b36292d218B106Fb39be7F',
                     fdsRegistrar: '0xFBF00389140C00384d88d458239833E3231a7414',
@@ -19,7 +20,7 @@ export async function makeFdp(globalState: GlobalState): Promise<FdpStorage> {
                 performChecks: true
             },
             providerOptions: {
-                url: globalState.configuration.sepolia
+                url: blogState.configuration.sepolia
             },
             ensDomain: 'fds'
         }

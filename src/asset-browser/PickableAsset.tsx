@@ -1,14 +1,19 @@
 import { Optional, Strings } from 'cafe-utility'
-import { Asset } from '../libetherjot'
+import { assetPickChannel, assetPickerChannel } from '../GlobalContext'
+import { Asset } from '../libetherjot/engine/BlogState'
 
 interface Props {
     asset: Asset
-    callback: (asset: Optional<Asset>) => void
 }
 
-export function PickableAsset({ asset, callback }: Props) {
+export function PickableAsset({ asset }: Props) {
+    function onClick() {
+        assetPickChannel.publish(Optional.of(asset))
+        assetPickerChannel.publish(false)
+    }
+
     return (
-        <div className="thumbnail" onClick={() => callback(Optional.of(asset))}>
+        <div className="thumbnail" onClick={onClick}>
             <img className="thumbnail-image" src={Strings.joinUrl('http://localhost:1633/bytes', asset.reference)} />
             <p className="thumbnail-name">{asset.name}</p>
         </div>

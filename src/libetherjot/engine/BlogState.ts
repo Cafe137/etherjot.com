@@ -1,7 +1,8 @@
 import { Objects, Types } from 'cafe-utility'
 import { Wallet, ethers } from 'ethers'
-import { Swarm } from '../../libswarm'
+import { LocalStorageKeys } from '../../Persistence'
 import { createFrontPage } from '../page/FrontPage'
+import { SwarmState } from './SwarmState'
 
 export interface Asset {
     name: string
@@ -9,7 +10,7 @@ export interface Asset {
     reference: string
 }
 
-interface Configuration {
+export interface Configuration {
     sepolia: string
     title: string
     header: {
@@ -61,9 +62,7 @@ export interface Article {
     commentsFeed: string
 }
 
-export interface GlobalStateOnDisk {
-    beeApi: string
-    postageBatchId: string
+export interface BlogStateOnDisk {
     privateKey: string
     configuration: Configuration
     feed: string
@@ -73,10 +72,7 @@ export interface GlobalStateOnDisk {
     assets: Asset[]
 }
 
-export interface GlobalState {
-    beeApi: string
-    postageBatchId: string
-    swarm: Swarm
+export interface BlogState {
     wallet: Wallet
     configuration: Configuration
     feed: string
@@ -86,12 +82,10 @@ export interface GlobalState {
     assets: Asset[]
 }
 
-export async function getGlobalState(json: Record<string, any>): Promise<GlobalState> {
+export function getBlogState(json: Record<string, any>): BlogState {
     const configuration = Types.asObject(json.configuration)
-    const globalStateOnDisk: GlobalStateOnDisk = {
+    const blogStateOnDisk: BlogStateOnDisk = {
         privateKey: Types.asString(json.privateKey),
-        beeApi: Types.asString(json.beeApi),
-        postageBatchId: Types.asEmptiableString(json.postageBatchId),
         configuration: {
             sepolia: Types.asString(Objects.getDeep(configuration, 'sepolia') ?? 'https://sepolia.drpc.org'),
             title: Types.asString(configuration.title),
@@ -158,49 +152,32 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
             reference: Types.asString(x.reference)
         }))
     }
-    return createGlobalState(globalStateOnDisk)
+    return createBlogState(blogStateOnDisk)
 }
 
-export async function saveGlobalState(globalState: GlobalState): Promise<GlobalStateOnDisk> {
-    const globalStateOnDisk: GlobalStateOnDisk = {
-        beeApi: globalState.beeApi,
-        postageBatchId: globalState.postageBatchId,
-        privateKey: globalState.wallet.privateKey,
-        configuration: globalState.configuration,
-        feed: globalState.feed,
-        pages: globalState.pages,
-        articles: globalState.articles,
-        collections: globalState.collections,
-        assets: globalState.assets
+export function saveBlogState(blogState: BlogState): BlogStateOnDisk {
+    const blogStateOnDisk: BlogStateOnDisk = {
+        privateKey: blogState.wallet.privateKey,
+        configuration: blogState.configuration,
+        feed: blogState.feed,
+        pages: blogState.pages,
+        articles: blogState.articles,
+        collections: blogState.collections,
+        assets: blogState.assets
     }
-    return globalStateOnDisk
+    localStorage.setItem(LocalStorageKeys.BLOG, JSON.stringify(blogStateOnDisk))
+    return blogStateOnDisk
 }
 
-interface DefaultStateParams {
-    beeApi?: string
-    postageBatchId?: string
-}
-
-export async function createDefaultGlobalState(
-    websiteName: string,
-    params?: DefaultStateParams
-): Promise<GlobalStateOnDisk> {
-    const beeApi = params?.beeApi || 'http://localhost:1633'
-    const postageBatchId = params?.postageBatchId || ''
-    const swarm = new Swarm({
-        beeApi,
-        postageBatchId
-    })
+export async function createDefaultBlogState(websiteName: string, swarmState: SwarmState): Promise<BlogStateOnDisk> {
     const wallet = ethers.Wallet.createRandom()
-    const collection = await swarm.newCollection()
-    await collection.addRawData('index.html', await swarm.newRawData('hello', 'text/html'))
+    const collection = await swarmState.swarm.newCollection()
+    await collection.addRawData('index.html', await swarmState.swarm.newRawData('hello', 'text/html'))
     await collection.save()
-    const website = await swarm.newWebsite(wallet.privateKey, collection)
+    const website = await swarmState.swarm.newWebsite(wallet.privateKey, collection)
     const feed = await website.generateAddress()
     await website.publish(0)
-    const globalStateOnDisk: GlobalStateOnDisk = {
-        beeApi,
-        postageBatchId,
+    const blogStateOnDisk: BlogStateOnDisk = {
         privateKey: wallet.privateKey,
         pages: [],
         articles: [],
@@ -237,29 +214,24 @@ export async function createDefaultGlobalState(
         collections: {},
         assets: []
     }
-    await createFrontPage(createGlobalState(globalStateOnDisk))
-    return globalStateOnDisk
+    const blogState = createBlogState(blogStateOnDisk)
+    await createFrontPage(swarmState, blogState)
+    return blogStateOnDisk
 }
 
-function createGlobalState(globalStateOnDisk: GlobalStateOnDisk): GlobalState {
-    const globalState: GlobalState = {
-        beeApi: globalStateOnDisk.beeApi,
-        postageBatchId: globalStateOnDisk.postageBatchId,
-        swarm: new Swarm({
-            beeApi: globalStateOnDisk.beeApi,
-            postageBatchId: globalStateOnDisk.postageBatchId || undefined
-        }),
+function createBlogState(blogStateOnDisk: BlogStateOnDisk): BlogState {
+    const blogState: BlogState = {
         wallet: new ethers.Wallet(
-            globalStateOnDisk.privateKey.startsWith('0x')
-                ? globalStateOnDisk.privateKey.slice(2)
-                : globalStateOnDisk.privateKey
+            blogStateOnDisk.privateKey.startsWith('0x')
+                ? blogStateOnDisk.privateKey.slice(2)
+                : blogStateOnDisk.privateKey
         ),
-        configuration: globalStateOnDisk.configuration,
-        feed: globalStateOnDisk.feed,
-        pages: globalStateOnDisk.pages,
-        articles: globalStateOnDisk.articles,
-        collections: globalStateOnDisk.collections,
-        assets: globalStateOnDisk.assets
+        configuration: blogStateOnDisk.configuration,
+        feed: blogStateOnDisk.feed,
+        pages: blogStateOnDisk.pages,
+        articles: blogStateOnDisk.articles,
+        collections: blogStateOnDisk.collections,
+        assets: blogStateOnDisk.assets
     }
-    return globalState
+    return blogState
 }
