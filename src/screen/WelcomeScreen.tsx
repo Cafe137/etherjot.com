@@ -114,19 +114,19 @@ export function WelcomeScreen() {
                         internet with simplicity in mind.
                     </Typography>
                     <Typography>
-                        <Typography bold>Markdown syntax.</Typography> Write your blog posts and take care of formatting
-                        in a familiar way.
+                        <strong>Markdown syntax.</strong> Write your blog posts and take care of formatting in a
+                        familiar way.
                     </Typography>
                     <Typography>
-                        <Typography bold>Organize your content.</Typography> Use tags, categories and types to
-                        structurize your posts.
+                        <strong>Organize your content.</strong> Use tags, categories and types to structurize your
+                        posts.
                     </Typography>
                     <Typography>
-                        <Typography bold>Comments and community.</Typography> Enable comments and let your readers
-                        engage with your content or support hosting.
+                        <strong>Comments and community.</strong> Enable comments and let your readers engage with your
+                        content or support hosting.
                     </Typography>
                     <Typography>
-                        <Typography bold>Made for Web3.</Typography>
+                        <strong>Made for Web3.</strong>
                         Uses the Swarm network to store and host your blog out of the box, no server required.
                     </Typography>
                     <Vertical full>

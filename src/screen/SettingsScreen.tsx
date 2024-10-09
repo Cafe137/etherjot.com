@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Swal from 'sweetalert2'
 import { Button } from '../Button'
 import { Container } from '../Container'
 import { assetPickChannel, assetPickerChannel, onConfigurationChange } from '../GlobalContext'
@@ -63,11 +62,6 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                 comments
             },
             sepolia
-        })
-        Swal.fire({
-            title: 'Saved!',
-            timer: 1000,
-            timerProgressBar: true
         })
     }
 

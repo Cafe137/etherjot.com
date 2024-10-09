@@ -1,3 +1,5 @@
+import { Bee } from '@ethersphere/bee-js'
+import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import {
     assetBrowserChannel,
@@ -23,6 +25,29 @@ interface Props {
 }
 
 export function MenuBar({ blogState, swarmState }: Props) {
+    const [peers, setPeers] = useState<number | null>(0)
+
+    useEffect(() => {
+        const bee = new Bee(swarmState.beeApi)
+        bee.getTopology()
+            .then(({ connected }) => {
+                setPeers(connected)
+            })
+            .catch(() => {
+                setPeers(null)
+            })
+        const interval = setInterval(() => {
+            bee.getTopology()
+                .then(({ connected }) => {
+                    setPeers(connected)
+                })
+                .catch(() => {
+                    setPeers(null)
+                })
+        }, 3000)
+        return () => clearInterval(interval)
+    }, [swarmState])
+
     function onSettings() {
         screenChannel.publish(Screens.SETTINGS)
     }
@@ -121,14 +146,10 @@ export function MenuBar({ blogState, swarmState }: Props) {
                     ]}
                 />
             </Horizontal>
-            <Horizontal gap={16} p="0px 4px">
-                <Horizontal gap={2}>
-                    <Typography size={14}>Bee</Typography>
-                    <SquareImage size={14} src={true ? './assets/yes.png' : './assets/no.png'} />
-                </Horizontal>
-                <Horizontal gap={2}>
-                    <Typography size={14}>Stamp</Typography>
-                    <SquareImage size={14} src={true ? './assets/yes.png' : './assets/no.png'} />
+            <Horizontal gap={16} p="0px 8px">
+                <Horizontal gap={4}>
+                    <SquareImage size={16} src={peers !== null ? './assets/yes.png' : './assets/no.png'} />
+                    <Typography size={14}>{peers === null ? 'No connection' : `${peers} connected peers`}</Typography>
                 </Horizontal>
             </Horizontal>
         </Horizontal>

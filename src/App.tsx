@@ -33,6 +33,21 @@ export function App() {
     const [blogState, setBlogState] = useState<BlogState | null>(null)
     const [screen, setScreen] = useState<Screens>(Screens.WELCOME)
 
+    function navigate(allowWelcome: boolean) {
+        const hash = window.location.hash
+        if (hash === '#/editor') {
+            setScreen(Screens.EDITOR)
+        } else if (hash === '#/settings') {
+            setScreen(Screens.SETTINGS)
+        } else if (allowWelcome) {
+            setScreen(Screens.WELCOME)
+            window.location.hash = ''
+        } else {
+            setScreen(Screens.EDITOR)
+            window.location.hash = '#/editor'
+        }
+    }
+
     useEffect(() => {
         const storedSwarmState = localStorage.getItem(LocalStorageKeys.SWARM)
         const storedBlogState = localStorage.getItem(LocalStorageKeys.BLOG)
@@ -47,12 +62,21 @@ export function App() {
             setBlogState(getBlogState(parsedBlogState))
             checks++
         }
-        if (checks === 2) {
-            setScreen(Screens.EDITOR)
-        }
+        navigate(checks !== 2)
         return Arrays.multicall([
             screenChannel.subscribe(newScreen => {
-                setScreen(newScreen)
+                switch (newScreen) {
+                    case Screens.EDITOR:
+                        window.location.hash = '#/editor'
+                        break
+                    case Screens.SETTINGS:
+                        window.location.hash = '#/settings'
+                        break
+                    default:
+                        window.location.hash = ''
+                        break
+                }
+                navigate(true)
             }),
             onBlogCreate.subscribe(() => {
                 const storedSwarmState = localStorage.getItem(LocalStorageKeys.SWARM)
@@ -145,10 +169,12 @@ export function App() {
                 saveBlogState(blogState)
                 Swal.fire('Article Deleted', 'The article was deleted successfully.', 'success')
             }),
-            onConfigurationChange.subscribe(configuration => {
+            onConfigurationChange.subscribe(async configuration => {
                 blogState.configuration = configuration
+                await recreateMantaray(swarmState, blogState)
                 setBlogState({ ...blogState })
                 saveBlogState(blogState)
+                Swal.fire('Configuration Saved', 'The configuration was saved successfully.', 'success')
             })
         ])
     }, [blogState])
