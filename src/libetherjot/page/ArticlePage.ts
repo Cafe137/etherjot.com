@@ -10,12 +10,12 @@ import { createDonationButton } from '../html/Donation'
 import { createFooter } from '../html/Footer'
 import { createHeader } from '../html/Header'
 import { createHtml5 } from '../html/Html5'
+import { createImmortalSvg } from '../html/ImmortalSvg'
 import { createLinkSvg } from '../html/LinkSvg'
-import { createLinkedinSvg } from '../html/LinkedinSvg'
 import { createRelatedArticles } from '../html/RelatedArticles'
 import { createStyleSheet } from '../html/StyleSheet'
 import { createTagCloud } from '../html/TagCloud'
-import { createTwitterSvg } from '../html/TwitterSvg'
+import { createImmortalPage } from './ImmortalPage'
 
 export async function createArticlePage(
     swarmState: SwarmState,
@@ -29,6 +29,7 @@ export async function createArticlePage(
     commentsFeed: string,
     kind: 'regular' | 'h1' | 'h2' | 'highlight'
 ): Promise<Article> {
+    const immortalHash = await createImmortalPage(swarmState, blogState, title, markdown, banner, date)
     const processedArticle = await preprocess(parse(markdown.body))
     const sidebarPublishedHtml = tags.length
         ? `<div class="article-sidebar-block"><h3>Published in:</h3><div class="tag-cloud">${createTagCloud(
@@ -93,8 +94,7 @@ export async function createArticlePage(
                         <div class="article-sidebar-block">
                             <h3>Share to:</h3>
                             <span id="share-link" class="pointer">${createLinkSvg()}</span>
-                            <span id="share-twitter" class="pointer">${createTwitterSvg()}</span>
-                            <span id="share-linkedin" class="pointer">${createLinkedinSvg()}</span>
+                            <span id="share-immortal" class="pointer">${createImmortalSvg()}</span>
                         </div>
                     </div>
                 </aside>
@@ -118,27 +118,14 @@ export async function createArticlePage(
     ${await createFooter(blogState)}
     <script>
         const shareLink = document.getElementById('share-link')
-        const shareTwitter = document.getElementById('share-twitter')
-        const shareLinkedin = document.getElementById('share-linkedin')
+        const shareImmortal = document.getElementById('share-immortal')
         const url = window.location.href
         shareLink.addEventListener('click', () => {
             navigator.clipboard.writeText(url)
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1000
-              })
-              Toast.fire({
-                icon: 'success',
-                title: 'Copied to clipboard'
-              })
+            alert('Link copied to clipboard!')
         })
-        shareTwitter.addEventListener('click', () => {
-            window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url))
-        })
-        shareLinkedin.addEventListener('click', () => {
-            window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url))
+        shareImmortal.addEventListener('click', () => {
+            window.open('http://localhost:1633/bzz/${immortalHash}', '_blank')
         })
     </script>`
     const year = new Date(date).getFullYear()
