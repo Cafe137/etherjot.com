@@ -9,9 +9,10 @@ interface Props {
     required?: boolean
     disabled?: boolean
     outline?: boolean
+    hint?: string
 }
 
-export function TextInput({ label, value, setter, password, required, disabled, outline }: Props) {
+export function TextInput({ label, value, setter, password, required, disabled, outline, hint }: Props) {
     return (
         <Vertical gap={4} left full>
             <Typography size={15} bold={required}>
@@ -28,6 +29,11 @@ export function TextInput({ label, value, setter, password, required, disabled, 
                 onChange={e => setter(e.target.value)}
                 disabled={disabled}
             />
+            {hint && (
+                <Typography size={12} dim>
+                    {hint}
+                </Typography>
+            )}
         </Vertical>
     )
 }

@@ -103,7 +103,7 @@ export function OptionsBar({ articleContent }: Props) {
                 category: articleCategory,
                 tags: articleTags
                     .split(',')
-                    .map(x => x.trim())
+                    .map(Strings.shrinkTrim)
                     .filter(x => x),
                 banner: articleBanner || '',
                 date: articleDate,
@@ -118,7 +118,7 @@ export function OptionsBar({ articleContent }: Props) {
                 category: articleCategory,
                 tags: articleTags
                     .split(',')
-                    .map(x => x.trim())
+                    .map(Strings.shrinkTrim)
                     .filter(x => x),
                 banner: articleBanner || '',
                 date: articleDate,
@@ -138,7 +138,7 @@ export function OptionsBar({ articleContent }: Props) {
             )}
             <TextInput value={articleTitle} setter={setArticleTitle} label="Title" required />
             <TextInput value={articleCategory} setter={setArticleCategory} label="Category" required />
-            <TextInput value={articleDate} setter={setArticleDate} label="Date" required />
+            <TextInput value={articleDate} setter={setArticleDate} label="Date" required hint="yyyy-mm-dd format" />
             <Vertical left gap={4} full>
                 <Typography size={15}>Banner image</Typography>
                 {articleBanner && <img src={`http://localhost:1633/bytes/${articleBanner}`} />}
@@ -168,7 +168,7 @@ export function OptionsBar({ articleContent }: Props) {
                     <option value="h2">Secondary</option>
                 </select>
             </Vertical>
-            <TextInput value={articleTags} setter={setArticleTags} label="Tags (comma)" />
+            <TextInput value={articleTags} setter={setArticleTags} label="Tags" hint="Comma-separated" />
             <Button onClick={onPublish} disabled={!articleTitle || !articleCategory || loading}>
                 {loading ? 'Saving...' : editing ? 'Update' : 'Publish'}
             </Button>

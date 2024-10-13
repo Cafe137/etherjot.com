@@ -18,9 +18,11 @@ import {
     onConfigurationSuccess,
     onLoadState,
     onLoadSuccess,
+    onZipImport,
     screenChannel
 } from './GlobalContext'
 import { BlogState, getBlogState, saveBlogState } from './libetherjot/engine/BlogState'
+import { ParsedMarkdownReader, parseMarkdown } from './libetherjot/engine/FrontMatter'
 import { recreateMantaray } from './libetherjot/engine/Mantaray'
 import { getSwarmState, SwarmState } from './libetherjot/engine/SwarmState'
 import { createArticlePage } from './libetherjot/page/ArticlePage'
@@ -156,6 +158,35 @@ export function App() {
                 saveBlogState(blogState)
                 Swal.fire('Article Created', 'The article was created successfully.', 'success')
                 onArticleSuccess.publish()
+            }),
+            onZipImport.subscribe(async zip => {
+                onLoadState.publish('Importing from zip...')
+                for (const file of Object.values(zip.files)) {
+                    if (file.dir) {
+                        continue
+                    }
+                    if (file.name.endsWith('.md') || file.name.endsWith('.markdown')) {
+                        const parsedMarkdown = parseMarkdown(await file.async('text'))
+                        const reader = new ParsedMarkdownReader(parsedMarkdown)
+                        const articlePage = await createArticlePage(
+                            swarmState,
+                            blogState,
+                            reader.titleOr(file.name),
+                            reader.unwrap(),
+                            reader.categoryOr('Uncategorized'),
+                            reader.tags(),
+                            reader.banner(),
+                            reader.date(),
+                            reader.commentsFeed(),
+                            reader.type()
+                        )
+                        blogState.articles.push(articlePage)
+                    }
+                }
+                await recreateMantaray(swarmState, blogState)
+                setBlogState({ ...blogState })
+                saveBlogState(blogState)
+                Swal.fire('Imported from zip', 'The zip was imported successfully.', 'success')
             }),
             onArticleEdit.subscribe(async article => {
                 blogState.articles = blogState.articles.filter(x => x.title !== article.oldTitle)

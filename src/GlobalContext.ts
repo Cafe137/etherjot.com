@@ -1,4 +1,5 @@
 import { Optional, PubSubChannel } from 'cafe-utility'
+import JSZip from 'jszip'
 import { Asset, Configuration } from './libetherjot/engine/BlogState'
 import { ParsedMarkdown } from './libetherjot/engine/FrontMatter'
 import { Screens } from './Navigation'
@@ -55,3 +56,5 @@ export const onSaveToLocal = new PubSubChannel<Saveable>()
 
 export const onLoadState = new PubSubChannel<string>()
 export const onLoadSuccess = new PubSubChannel<void>()
+
+export const onZipImport = new PubSubChannel<JSZip>()

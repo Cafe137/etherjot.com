@@ -3,6 +3,7 @@ import { Dates, Strings } from 'cafe-utility'
 import JSZip from 'jszip'
 import Swal from 'sweetalert2'
 import { swalLogin } from '../account/SwalLogin'
+import { onZipImport } from '../GlobalContext'
 import { Article, BlogState, saveBlogState } from '../libetherjot/engine/BlogState'
 import { saveSwarmState, SwarmState } from '../libetherjot/engine/SwarmState'
 import { makeFdp } from './FdpMaker'
@@ -119,5 +120,28 @@ export async function onExport(swarmState: SwarmState, blogState: BlogState) {
 }
 
 export async function onImport() {
-    Swal.fire('Todo')
+    await Swal.fire({
+        title: 'Please Select Zip File',
+        input: 'file',
+        inputAttributes: {
+            accept: 'application/zip',
+            'aria-label': 'Select Zip'
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: result => {
+            const reader = new FileReader()
+            reader.onload = event => {
+                if (!event.target) {
+                    return
+                }
+                if (!(event.target.result instanceof ArrayBuffer)) {
+                    throw Error('Expected ArrayBuffer')
+                }
+                new JSZip().loadAsync(event.target.result).then(zip => {
+                    onZipImport.publish(zip)
+                })
+            }
+            reader.readAsArrayBuffer(result)
+        }
+    })
 }
