@@ -5,7 +5,7 @@ import Swal from 'sweetalert2'
 import { Banner } from '../Banner'
 import { Button } from '../Button'
 import { EditIcon } from '../EditIcon'
-import { onBlogCreate, screenChannel } from '../GlobalContext'
+import { onBlogCreate, onLoadState, onLoadSuccess, screenChannel } from '../GlobalContext'
 import { Horizontal } from '../Horizontal'
 import { Screens } from '../Navigation'
 import { SquareImage } from '../SquareImage'
@@ -13,6 +13,7 @@ import { TextInput } from '../TextInput'
 import { Typography } from '../Typography'
 import { Vertical } from '../Vertical'
 import { createDefaultBlogState, getBlogState, saveBlogState } from '../libetherjot/engine/BlogState'
+import { recreateMantaray } from '../libetherjot/engine/Mantaray'
 import { createSwarmState, saveSwarmState } from '../libetherjot/engine/SwarmState'
 
 export function WelcomeScreen() {
@@ -49,12 +50,15 @@ export function WelcomeScreen() {
             return
         }
         setLoading(true)
+        onLoadState.publish('Creating blank state...')
         const swarmState = createSwarmState({ beeApi: url, postageBatchId: stamp.batchID })
         const blogStateOnDisk = await createDefaultBlogState(blogName, swarmState)
         const blogState = getBlogState(blogStateOnDisk)
         saveSwarmState(swarmState)
         saveBlogState(blogState)
+        await recreateMantaray(swarmState, blogState)
         onBlogCreate.publish()
+        onLoadSuccess.publish()
         screenChannel.publish(Screens.EDITOR)
     }
 
@@ -193,7 +197,7 @@ export function WelcomeScreen() {
                     </Typography>
                     <TextInput label="Enter your new web3 blog's name" value={blogName} setter={setBlogName} outline />
                     <Vertical full>
-                        <Button onClick={onCreate} disabled={!blogName || !isBeeRunning || !stamp}>
+                        <Button onClick={onCreate} disabled={!blogName || !isBeeRunning || !stamp || loading}>
                             {loading ? 'Creating...' : 'Create'}
                         </Button>
                     </Vertical>

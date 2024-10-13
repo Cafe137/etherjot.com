@@ -1,13 +1,19 @@
+import { Bee } from '@ethersphere/bee-js'
+import { Dates, Objects } from 'cafe-utility'
+import { onLoadState } from '../../GlobalContext'
 import { createDefaultImage } from '../html/DefaultImage'
 import { createFavicon } from '../html/Favicon'
 import { createArticleFontData, createBrandingFontData, createNormalFontData } from '../html/Font'
 import { createStyle } from '../html/Style'
+import { createArticlePage } from '../page/ArticlePage'
 import { createFrontPage } from '../page/FrontPage'
 import { BlogState } from './BlogState'
+import { parseMarkdown } from './FrontMatter'
 import { SwarmState } from './SwarmState'
 import { createArticleSlug } from './Utility'
 
 export async function recreateMantaray(swarmState: SwarmState, blogState: BlogState): Promise<void> {
+    onLoadState.publish('Rebuilding website...')
     const collection = await swarmState.swarm.newCollection()
     await collection.addRawData(
         'font-variant-1.ttf',
@@ -26,15 +32,27 @@ export async function recreateMantaray(swarmState: SwarmState, blogState: BlogSt
     await collection.addRawData('favicon.png', await swarmState.swarm.newRawData(createFavicon(), 'image/png'))
     await collection.addRawData('/', await createFrontPage(swarmState, blogState))
     await collection.addRawData('index.html', await createFrontPage(swarmState, blogState))
-    for (const page of blogState.pages) {
-        await collection.addHandle(page.path, await swarmState.swarm.newHandle(page.path, page.html, 'text/html'))
-    }
-    for (const article of blogState.articles) {
-        await collection.addHandle(
-            article.path,
-            await swarmState.swarm.newHandle(article.path, article.html, 'text/html')
+    blogState.articles = await Objects.mapAllAsync(blogState.articles, async article => {
+        const bee = new Bee(swarmState.beeApi)
+        const markdown = await bee.downloadFile(article.markdown)
+        const newArticle = await createArticlePage(
+            swarmState,
+            blogState,
+            article.title,
+            parseMarkdown(markdown.data.text()),
+            article.category,
+            article.tags,
+            article.banner,
+            Dates.isoDate(new Date(article.createdAt)),
+            article.commentsFeed,
+            article.kind
         )
-    }
+        await collection.addHandle(
+            newArticle.path,
+            await swarmState.swarm.newHandle(newArticle.path, newArticle.html, 'text/html')
+        )
+        return newArticle
+    })
     for (const collectionPage of Object.keys(blogState.collections)) {
         await collection.addHandle(
             createArticleSlug(collectionPage),
@@ -49,5 +67,6 @@ export async function recreateMantaray(swarmState: SwarmState, blogState: BlogSt
     }
     await collection.save()
     const website = await swarmState.swarm.newWebsite(blogState.wallet.privateKey, collection)
+    onLoadState.publish('Publishing latest version...')
     await website.publish()
 }

@@ -1,6 +1,7 @@
+import { Arrays } from 'cafe-utility'
 import { useEffect, useState } from 'react'
 import { Button } from '../Button'
-import { assetPickChannel, assetPickerChannel, onConfigurationChange } from '../GlobalContext'
+import { assetPickChannel, assetPickerChannel, onConfigurationChange, onConfigurationSuccess } from '../GlobalContext'
 import { Horizontal } from '../Horizontal'
 import { BlogState } from '../libetherjot/engine/BlogState'
 import { SwarmState } from '../libetherjot/engine/SwarmState'
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function SettingsScreen({ swarmState, blogState }: Props) {
+    const [loading, setLoading] = useState(false)
     const [title, setTitle] = useState(blogState.configuration.title)
     const [headerTitle, setHeaderTitle] = useState(blogState.configuration.header.title)
     const [headerLogo, setHeaderLogo] = useState(blogState.configuration.header.logo)
@@ -34,6 +36,7 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
     const [sepolia, setSepolia] = useState(blogState.configuration.sepolia)
 
     async function onSave() {
+        setLoading(true)
         onConfigurationChange.publish({
             title,
             header: {
@@ -66,11 +69,16 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
     }
 
     useEffect(() => {
-        return assetPickChannel.subscribe(asset => {
-            asset.ifPresent(a => {
-                setHeaderLogo(a.reference)
+        return Arrays.multicall([
+            assetPickChannel.subscribe(asset => {
+                asset.ifPresent(a => {
+                    setHeaderLogo(a.reference)
+                })
+            }),
+            onConfigurationSuccess.subscribe(() => {
+                setLoading(false)
             })
-        })
+        ])
     }, [])
 
     return (
@@ -174,7 +182,9 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                     <h2>FDP Storage</h2>
                     <Setting title="Sepolia JSON RPC" value={sepolia} onChange={setSepolia} />
                     <h2>Apply changes</h2>
-                    <Button onClick={onSave}>Save</Button>
+                    <Button onClick={onSave} disabled={loading}>
+                        Save
+                    </Button>
                 </Vertical>
             </Horizontal>
         </>

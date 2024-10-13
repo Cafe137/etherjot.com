@@ -1,7 +1,6 @@
 import { Objects, Types } from 'cafe-utility'
 import { Wallet, ethers } from 'ethers'
 import { LocalStorageKeys } from '../../Persistence'
-import { createFrontPage } from '../page/FrontPage'
 import { SwarmState } from './SwarmState'
 
 export interface Asset {
@@ -214,8 +213,6 @@ export async function createDefaultBlogState(websiteName: string, swarmState: Sw
         collections: {},
         assets: []
     }
-    const blogState = createBlogState(blogStateOnDisk)
-    await createFrontPage(swarmState, blogState)
     return blogStateOnDisk
 }
 

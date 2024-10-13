@@ -46,8 +46,12 @@ export const onContentInsert = new PubSubChannel<string>()
 export const onContentReplace = new PubSubChannel<string>()
 
 export const onConfigurationChange = new PubSubChannel<Configuration>()
+export const onConfigurationSuccess = new PubSubChannel<void>()
 
 export const onSaveToDriveRequest = new PubSubChannel<void>()
 export const onSaveToLocalRequest = new PubSubChannel<void>()
 export const onSaveToDrive = new PubSubChannel<Saveable>()
 export const onSaveToLocal = new PubSubChannel<Saveable>()
+
+export const onLoadState = new PubSubChannel<string>()
+export const onLoadSuccess = new PubSubChannel<void>()

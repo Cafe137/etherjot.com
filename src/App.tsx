@@ -15,6 +15,9 @@ import {
     onBlogCreate,
     onBlogReset,
     onConfigurationChange,
+    onConfigurationSuccess,
+    onLoadState,
+    onLoadSuccess,
     screenChannel
 } from './GlobalContext'
 import { BlogState, getBlogState, saveBlogState } from './libetherjot/engine/BlogState'
@@ -64,6 +67,18 @@ export function App() {
         }
         navigate(checks !== 2)
         return Arrays.multicall([
+            onLoadState.subscribe(async message => {
+                Swal.fire({
+                    allowEnterKey: false,
+                    allowEscapeKey: false,
+                    title: message,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading()
+                })
+            }),
+            onLoadSuccess.subscribe(async () => {
+                Swal.close()
+            }),
             screenChannel.subscribe(newScreen => {
                 switch (newScreen) {
                     case Screens.EDITOR:
@@ -122,6 +137,7 @@ export function App() {
                 saveBlogState(blogState)
             }),
             onArticleCreate.subscribe(async article => {
+                onLoadState.publish('Creating article...')
                 const articlePage = await createArticlePage(
                     swarmState,
                     blogState,
@@ -163,6 +179,7 @@ export function App() {
                 onArticleSuccess.publish()
             }),
             onArticleDelete.subscribe(async title => {
+                onLoadState.publish('Deleting article...')
                 blogState.articles = blogState.articles.filter(article => article.title !== title)
                 await recreateMantaray(swarmState, blogState)
                 setBlogState({ ...blogState })
@@ -175,6 +192,7 @@ export function App() {
                 setBlogState({ ...blogState })
                 saveBlogState(blogState)
                 Swal.fire('Configuration Saved', 'The configuration was saved successfully.', 'success')
+                onConfigurationSuccess.publish()
             })
         ])
     }, [blogState])

@@ -261,6 +261,7 @@ aside {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
+    word-break: break-word;
 }
 .article-timestamp, .article-word-count {
     color: #626262;
