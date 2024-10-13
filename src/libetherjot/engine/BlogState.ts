@@ -40,13 +40,6 @@ export interface Configuration {
     }
 }
 
-interface Page {
-    title: string
-    markdown: string
-    html: string
-    path: string
-}
-
 export interface Article {
     title: string
     preview: string
@@ -66,7 +59,6 @@ export interface BlogStateOnDisk {
     privateKey: string
     configuration: Configuration
     feed: string
-    pages: Page[]
     articles: Article[]
     collections: Record<string, string>
     assets: Asset[]
@@ -76,7 +68,6 @@ export interface BlogState {
     wallet: Wallet
     configuration: Configuration
     feed: string
-    pages: Page[]
     articles: Article[]
     collections: Record<string, string>
     assets: Asset[]
@@ -114,17 +105,11 @@ export function getBlogState(json: Record<string, any>): BlogState {
                 ethereumAddress: Types.asEmptiableString(
                     Objects.getDeep(configuration, 'extensions.ethereumAddress') || ''
                 ),
-                donations: Types.asBoolean(Objects.getDeep(configuration, 'extensions.donations')),
-                comments: Types.asBoolean(Objects.getDeep(configuration, 'extensions.comments'))
+                donations: Types.asBoolean(Objects.getDeep(configuration, 'extensions.donations') || false),
+                comments: Types.asBoolean(Objects.getDeep(configuration, 'extensions.comments') || false)
             }
         },
         feed: Types.asString(json.feed),
-        pages: Types.asArray(json.pages).map((x: any) => ({
-            title: Types.asString(x.title),
-            markdown: Types.asString(x.markdown),
-            html: Types.asString(x.html),
-            path: Types.asString(x.path)
-        })),
         articles: Types.asArray(json.articles).map((x: any) => {
             let kind: 'regular' | 'h1' | 'h2' = 'regular'
             if (x.kind === 'h1') {
@@ -163,7 +148,6 @@ export function saveBlogState(blogState: BlogState): BlogStateOnDisk {
         privateKey: blogState.wallet.privateKey,
         configuration: blogState.configuration,
         feed: blogState.feed,
-        pages: blogState.pages,
         articles: blogState.articles,
         collections: blogState.collections,
         assets: blogState.assets
@@ -182,7 +166,6 @@ export async function createDefaultBlogState(websiteName: string, swarmState: Sw
     await website.publish(0)
     const blogStateOnDisk: BlogStateOnDisk = {
         privateKey: wallet.privateKey,
-        pages: [],
         articles: [],
         feed,
         configuration: {
@@ -230,7 +213,6 @@ function createBlogState(blogStateOnDisk: BlogStateOnDisk): BlogState {
         ),
         configuration: blogStateOnDisk.configuration,
         feed: blogStateOnDisk.feed,
-        pages: blogStateOnDisk.pages,
         articles: blogStateOnDisk.articles,
         collections: blogStateOnDisk.collections,
         assets: blogStateOnDisk.assets
