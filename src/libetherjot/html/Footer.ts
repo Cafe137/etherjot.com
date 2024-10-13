@@ -3,6 +3,7 @@ import { BlogState } from '../engine/BlogState'
 import { createDiscordSvg } from './DiscordSvg'
 import { createGithubSvg } from './GithubSvg'
 import { createHomeSvg } from './HomeSvg'
+import { createLinkedinSvg } from './LinkedinSvg'
 import { createRedditSvg } from './RedditSvg'
 import { createSwarmSvg } from './SwarmSvg'
 import { createTwitterSvg } from './TwitterSvg'
@@ -16,6 +17,9 @@ export async function createFooter(blogState: BlogState) {
     const twitterHtml = footer.links.twitter ? createLinkSvg(createTwitterSvg(), 'Twitter', footer.links.twitter) : ''
     const redditHtml = footer.links.reddit ? createLinkSvg(createRedditSvg(), 'Reddit', footer.links.reddit) : ''
     const youtubeHtml = footer.links.youtube ? createLinkSvg(createYoutubeSvg(), 'YouTube', footer.links.youtube) : ''
+    const linkedInHtml = footer.links.linkedIn
+        ? createLinkSvg(createLinkedinSvg(), 'LinkedIn', footer.links.linkedIn)
+        : ''
     const linkHtml = blogState.configuration.header.linkAddress
         ? `${Strings.resolveMarkdownLinks(
               blogState.configuration.header.linkAddress,
@@ -40,6 +44,7 @@ export async function createFooter(blogState: BlogState) {
                 ${twitterHtml}
                 ${redditHtml}
                 ${youtubeHtml}
+                ${linkedInHtml}
             </div>
         </div>
     </footer>`

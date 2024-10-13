@@ -15,11 +15,12 @@ import {
     onSaveToLocal,
     onSaveToLocalRequest
 } from './GlobalContext'
+import { parseMarkdown } from './libetherjot/engine/FrontMatter'
+import { Setting } from './Setting'
 import './Sidebar.css'
 import { TextInput } from './TextInput'
 import { Typography } from './Typography'
 import { Vertical } from './Vertical'
-import { parseMarkdown } from './libetherjot/engine/FrontMatter'
 
 interface Props {
     articleContent: string
@@ -146,28 +147,19 @@ export function OptionsBar({ articleContent }: Props) {
                     Select
                 </Button>
             </Vertical>
-            <Vertical left gap={4} full>
-                <Typography size={15}>Type</Typography>
-                <select
-                    className="etherjot-input"
-                    value={articleType}
-                    onChange={event => {
-                        if (event.target.value === 'regular') {
-                            setArticleType('regular')
-                        }
-                        if (event.target.value === 'h1') {
-                            setArticleType('h1')
-                        }
-                        if (event.target.value === 'h2') {
-                            setArticleType('h2')
-                        }
-                    }}
-                >
-                    <option value="regular">Regular</option>
-                    <option value="h1">Primary</option>
-                    <option value="h2">Secondary</option>
-                </select>
-            </Vertical>
+            <Setting
+                title="Type"
+                type="select"
+                value={articleType}
+                onChange={value => {
+                    setArticleType(value as 'regular' | 'h1' | 'h2')
+                }}
+                values={[
+                    { name: 'Regular', value: 'regular' },
+                    { name: 'Primary', value: 'h1' },
+                    { name: 'Secondary', value: 'h2' }
+                ]}
+            />
             <TextInput value={articleTags} setter={setArticleTags} label="Tags" hint="Comma-separated" />
             <Button onClick={onPublish} disabled={!articleTitle || !articleCategory || loading}>
                 {loading ? 'Saving...' : editing ? 'Update' : 'Publish'}

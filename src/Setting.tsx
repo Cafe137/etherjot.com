@@ -18,13 +18,16 @@ export function Setting({ title, onChange, value, type = 'text', values, hint }:
             {type === 'text' && <TextInput setter={onChange} value={value} label={title} />}
             {type === 'textarea' && <TextareaInput setter={onChange} value={value} label={title} />}
             {type === 'select' && values && (
-                <select onChange={event => onChange(event.target.value)} value={value}>
-                    {values.map(x => (
-                        <option key={x.value} value={x.value}>
-                            {x.name}
-                        </option>
-                    ))}
-                </select>
+                <>
+                    <Typography size={15}>{title}</Typography>
+                    <select className="etherjot-input" onChange={event => onChange(event.target.value)} value={value}>
+                        {values.map(x => (
+                            <option key={x.value} value={x.value}>
+                                {x.name}
+                            </option>
+                        ))}
+                    </select>
+                </>
             )}
             {hint && (
                 <Typography size={12} dim>

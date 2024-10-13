@@ -30,6 +30,7 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
     const [footerGitHub, setFooterGitHub] = useState(blogState.configuration.footer.links.github)
     const [footerYouTube, setFooterYouTube] = useState(blogState.configuration.footer.links.youtube)
     const [footerReddit, setFooterReddit] = useState(blogState.configuration.footer.links.reddit)
+    const [footerLinkedIn, setFooterLinkedIn] = useState(blogState.configuration.footer.links.linkedIn)
     const [ethereumAddress, setEthereumAddress] = useState(blogState.configuration.extensions.ethereumAddress)
     const [donations, setDonations] = useState(blogState.configuration.extensions.donations)
     const [comments, setComments] = useState(blogState.configuration.extensions.comments)
@@ -56,7 +57,8 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                     twitter: footerTwitter,
                     github: footerGitHub,
                     youtube: footerYouTube,
-                    reddit: footerReddit
+                    reddit: footerReddit,
+                    linkedIn: footerLinkedIn
                 }
             },
             extensions: {
@@ -80,6 +82,11 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
             })
         ])
     }, [])
+
+    const uniqueCategories = new Set<string>()
+    for (const article of blogState.articles) {
+        uniqueCategories.add(article.category)
+    }
 
     return (
         <>
@@ -135,6 +142,17 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                 <Vertical p="16px" gap={16} left flex={1} color="#f0f0f0">
                     <h2>Front page</h2>
                     <Setting
+                        type="select"
+                        values={[
+                            {
+                                name: 'none',
+                                value: ''
+                            },
+                            ...Array.from(uniqueCategories).map(x => ({
+                                name: x,
+                                value: x
+                            }))
+                        ]}
                         title="Highlight"
                         value={mainHighlight}
                         onChange={setMainHighlight}
@@ -171,6 +189,7 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                         />
                         Enable comments
                     </Horizontal>
+                    <Setting title="Sepolia JSON RPC" value={sepolia} onChange={setSepolia} />
                 </Vertical>
                 <Vertical p="16px" gap={16} left flex={1} color="#f0f0f0">
                     <h2>Social Links</h2>
@@ -179,8 +198,7 @@ export function SettingsScreen({ swarmState, blogState }: Props) {
                     <Setting title="GitHub" value={footerGitHub} onChange={setFooterGitHub} />
                     <Setting title="YouTube" value={footerYouTube} onChange={setFooterYouTube} />
                     <Setting title="Reddit" value={footerReddit} onChange={setFooterReddit} />
-                    <h2>FDP Storage</h2>
-                    <Setting title="Sepolia JSON RPC" value={sepolia} onChange={setSepolia} />
+                    <Setting title="LinkedIn" value={footerLinkedIn} onChange={setFooterLinkedIn} />
                     <h2>Apply changes</h2>
                     <Button onClick={onSave} disabled={loading}>
                         Save

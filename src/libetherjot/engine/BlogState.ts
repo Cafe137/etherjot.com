@@ -30,6 +30,7 @@ export interface Configuration {
             github: string
             youtube: string
             reddit: string
+            linkedIn: string
         }
     }
     extensions: {
@@ -89,27 +90,30 @@ export function getBlogState(json: Record<string, any>): BlogState {
             sepolia: Types.asString(Objects.getDeep(configuration, 'sepolia') ?? 'https://sepolia.drpc.org'),
             title: Types.asString(configuration.title),
             header: {
-                title: Types.asEmptiableString(Objects.getDeep(configuration, 'header.title')),
-                logo: Types.asEmptiableString(Objects.getDeep(configuration, 'header.logo')),
-                description: Types.asEmptiableString(Objects.getDeep(configuration, 'header.description')),
-                linkLabel: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkLabel')),
-                linkAddress: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkAddress'))
+                title: Types.asEmptiableString(Objects.getDeep(configuration, 'header.title') || ''),
+                logo: Types.asEmptiableString(Objects.getDeep(configuration, 'header.logo') || ''),
+                description: Types.asEmptiableString(Objects.getDeep(configuration, 'header.description') || ''),
+                linkLabel: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkLabel') || ''),
+                linkAddress: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkAddress') || '')
             },
             main: {
-                highlight: Types.asEmptiableString(Objects.getDeep(configuration, 'main.highlight'))
+                highlight: Types.asEmptiableString(Objects.getDeep(configuration, 'main.highlight') || '')
             },
             footer: {
-                description: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.description')),
+                description: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.description') || ''),
                 links: {
-                    discord: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.discord')),
-                    twitter: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.twitter')),
-                    github: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.github')),
-                    youtube: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.youtube')),
-                    reddit: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.reddit'))
+                    discord: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.discord') || ''),
+                    twitter: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.twitter') || ''),
+                    github: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.github') || ''),
+                    youtube: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.youtube') || ''),
+                    reddit: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.reddit') || ''),
+                    linkedIn: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.linkedIn') || '')
                 }
             },
             extensions: {
-                ethereumAddress: Types.asEmptiableString(Objects.getDeep(configuration, 'extensions.ethereumAddress')),
+                ethereumAddress: Types.asEmptiableString(
+                    Objects.getDeep(configuration, 'extensions.ethereumAddress') || ''
+                ),
                 donations: Types.asBoolean(Objects.getDeep(configuration, 'extensions.donations')),
                 comments: Types.asBoolean(Objects.getDeep(configuration, 'extensions.comments'))
             }
@@ -201,7 +205,8 @@ export async function createDefaultBlogState(websiteName: string, swarmState: Sw
                     twitter: '',
                     github: '',
                     youtube: '',
-                    reddit: ''
+                    reddit: '',
+                    linkedIn: ''
                 }
             },
             extensions: {
