@@ -92,7 +92,7 @@ export async function createArticlePage(
                         </div>
                         ${sidebarPublishedHtml}
                         <div class="article-sidebar-block">
-                            <h3>Share to:</h3>
+                            <h3>Actions:</h3>
                             <span id="share-link" class="pointer">${createLinkSvg()}</span>
                             <span id="share-immortal" class="pointer">${createImmortalSvg()}</span>
                         </div>

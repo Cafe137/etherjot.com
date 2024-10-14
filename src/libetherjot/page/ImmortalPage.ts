@@ -43,9 +43,6 @@ export async function createImmortalPage(
     <main>
         <article>
             <div class="content-area grid-container">
-                <div class="grid-3">
-                    <p class="article-date">${date}</p>
-                </div>
                 <div class="grid-6">
                     <h1>${title}</h1>
                 </div>
@@ -74,6 +71,81 @@ export async function createImmortalPage(
             </div>
         </article>
     </main>
+    <footer>
+        <table>
+            <tr>
+                <td>Publish date</td>
+                <td>${new Date(date).toDateString()}</td>
+            </tr>
+            <tr>
+                <td>Swarm feed</td>
+                <td>${blogState.feed}</td>
+            </tr>
+            <tr>
+                <td>Postage batch</td>
+                <td>${swarmState.postageBatchId}</td>
+            </tr>
+            <tr>
+                <td>Valid until</td>
+                <td id="ttl">Loading...</td>
+            </tr>
+            <tr>
+                <td>Actions</td>
+                <td>
+                    <button id="pin">Pin</button>
+                    <button id="download">Download</button>
+                    <button id="topup">Top up</button>
+                </td>
+        </table>
+    </footer>
+    <script>
+        fetch('http://localhost:1633/stamps')
+            .then(response => response.json())
+            .then(data => {
+                const stamp = data.stamps.find(x => x.batchID === '${swarmState.postageBatchId}')
+                if (stamp) {
+                    document.getElementById('ttl').innerText = new Date(Date.now() + stamp.batchTTL * 1000).toDateString()
+                }
+            })
+        document.getElementById('pin').addEventListener('click', async () => {
+            fetch('http://localhost:1633/pins/' + location.href.split('/bzz/')[1].slice(0, 64), { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Pinned')
+                    } else {
+                        alert('Failed to pin')
+                    }
+                })
+                .catch(() => {
+                    alert('Failed to pin')
+                })
+        })
+        document.getElementById('download').addEventListener('click', async () => {
+            const response = await fetch('./')
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'index.html'
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+        })
+        document.getElementById('topup').addEventListener('click', async () => {
+        const amount = prompt('Enter amount')
+        fetch('http://localhost:1633/stamps/topup/${swarmState.postageBatchId}/' + amount, { method: 'PATCH' })
+            .then(response => {
+                if (response.ok) {
+                    alert('Topped up')
+                } else {
+                    alert('Failed to top up')
+                }
+            })
+            .catch(() => {
+                alert('Failed to top up')
+            })
+        })
+    </script>
     </body>
 </html>`
     const uploadResult = await bee.uploadFile(swarmState.postageBatchId, html, 'index.html', {

@@ -37,6 +37,9 @@ footer {
     padding-top: 85px;
     padding-bottom: 85px;
 }
+tr {
+    height: 50px;
+}
 .footer-container {
     display: flex;
     flex-direction: row;
