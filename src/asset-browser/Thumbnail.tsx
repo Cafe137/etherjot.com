@@ -2,6 +2,7 @@ import Swal from 'sweetalert2'
 import { Button } from '../Button'
 import { onAssetDelete, onAssetRename, onContentInsert } from '../GlobalContext'
 import { Horizontal } from '../Horizontal'
+import { Vertical } from '../Vertical'
 
 interface Props {
     name: string
@@ -41,7 +42,7 @@ export function Thumbnail({ name, reference }: Props) {
     }
 
     return (
-        <div className="thumbnail">
+        <Vertical gap={2}>
             <img className="thumbnail-image" src={`http://localhost:1633/bytes/${reference}`} />
             <p className="thumbnail-name">{name}</p>
             <Horizontal gap={8}>
@@ -55,6 +56,6 @@ export function Thumbnail({ name, reference }: Props) {
                     Delete
                 </Button>
             </Horizontal>
-        </div>
+        </Vertical>
     )
 }
