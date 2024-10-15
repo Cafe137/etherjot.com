@@ -1,3 +1,4 @@
+import { Bee } from '@ethersphere/bee-js'
 import { Dates } from 'cafe-utility'
 import Swal from 'sweetalert2'
 import { DeleteIcon } from './DeleteIcon'
@@ -6,15 +7,17 @@ import { onArticleBeginEdit, onArticleDelete, screenChannel } from './GlobalCont
 import { Horizontal } from './Horizontal'
 import { Article, BlogState } from './libetherjot/engine/BlogState'
 import { parseMarkdown } from './libetherjot/engine/FrontMatter'
+import { SwarmState } from './libetherjot/engine/SwarmState'
 import { Screens } from './Navigation'
 import { Typography } from './Typography'
 
 interface Props {
+    swarmState: SwarmState
     blogState: BlogState
     article: Article
 }
 
-export function ExistingArticle({ blogState, article }: Props) {
+export function ExistingArticle({ swarmState, blogState, article }: Props) {
     async function onDelete() {
         const confirmed = await Swal.fire({
             title: 'Are you sure?',
@@ -36,9 +39,11 @@ export function ExistingArticle({ blogState, article }: Props) {
         if (!confirmed.isConfirmed) {
             return
         }
+        const bee = new Bee(swarmState.beeApi)
+        const markdownFile = await bee.downloadFile(article.markdown)
         onArticleBeginEdit.publish({
             title: article.title,
-            markdown: parseMarkdown(article.markdown),
+            markdown: parseMarkdown(markdownFile.data.text()),
             category: article.category,
             tags: article.tags,
             banner: article.banner,

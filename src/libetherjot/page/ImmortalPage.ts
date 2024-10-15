@@ -1,5 +1,5 @@
 import { Bee } from '@ethersphere/bee-js'
-import { Binary, Strings } from 'cafe-utility'
+import { Binary, Strings, Types } from 'cafe-utility'
 import { parse } from 'marked'
 import { BlogState } from '../engine/BlogState'
 import { ParsedMarkdown } from '../engine/FrontMatter'
@@ -26,6 +26,27 @@ export async function createImmortalPage(
         bannerDataUri = `data:image/png;base64,${DEFAULT_IMAGE}`
     }
     const processedArticle = await preprocess(parse(markdown.body))
+    const imageSources = Strings.extractAllBlocks(processedArticle.html, {
+        opening: '<img src="',
+        closing: '"',
+        exclusive: true
+    })
+    for (const imageSource of imageSources) {
+        const swarmHash = Strings.searchHex(imageSource, 64)
+        if (!swarmHash) {
+            continue
+        }
+        const data = await bee.downloadData(swarmHash)
+        let contentType = 'image/png'
+        if (Types.isJpg(data)) {
+            contentType = 'image/jpeg'
+        }
+        if (Types.isWebp(data)) {
+            contentType = 'image/webp'
+        }
+        const dataUri = `data:${contentType};base64,${Binary.uint8ArrayToBase64(data)}`
+        processedArticle.html = processedArticle.html.replace(`<img src="${imageSource}"`, `<img src="${dataUri}"`)
+    }
     const bannerHtml = `<div class="content-area onpage-banner">
                 <img src="${bannerDataUri}" class="banner" />
             </div>`
@@ -121,18 +142,21 @@ export async function createImmortalPage(
                 })
         })
         document.getElementById('download').addEventListener('click', async () => {
-            const response = await fetch('./')
+            const response = await fetch(location.href)
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = 'index.html'
+            a.download = '${Strings.slugify(title)}.html'
             document.body.appendChild(a)
             a.click()
             window.URL.revokeObjectURL(url)
         })
         document.getElementById('topup').addEventListener('click', async () => {
         const amount = prompt('Enter amount')
+        if (!amount) {
+            return
+        }
         fetch('http://localhost:1633/stamps/topup/${swarmState.postageBatchId}/' + amount, { method: 'PATCH' })
             .then(response => {
                 if (response.ok) {

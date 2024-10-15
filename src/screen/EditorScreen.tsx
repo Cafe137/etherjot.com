@@ -1,7 +1,7 @@
 import { Arrays } from 'cafe-utility'
 import { useEffect, useState } from 'react'
 import { DEFAULT_CONTENT } from '../Constants'
-import { onArticleReset, onContentInsert, onContentReplace } from '../GlobalContext'
+import { onArticleBeginEdit, onArticleReset, onContentInsert, onContentReplace } from '../GlobalContext'
 import { BlogState } from '../libetherjot/engine/BlogState'
 import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { MenuBar } from '../MenuBar'
@@ -27,6 +27,9 @@ export function EditorScreen({ blogState, swarmState }: Props) {
             }),
             onArticleReset.subscribe(() => {
                 setArticleContent(DEFAULT_CONTENT)
+            }),
+            onArticleBeginEdit.subscribe(article => {
+                setArticleContent(article.markdown.body)
             })
         ])
     }, [])
@@ -35,7 +38,7 @@ export function EditorScreen({ blogState, swarmState }: Props) {
         <>
             <MenuBar blogState={blogState} swarmState={swarmState} />
             <main>
-                <Sidebar blogState={blogState} />
+                <Sidebar swarmState={swarmState} blogState={blogState} />
                 <NewPostPage articleContent={articleContent} setArticleContent={setArticleContent} />
                 <OptionsBar articleContent={articleContent} />
             </main>
