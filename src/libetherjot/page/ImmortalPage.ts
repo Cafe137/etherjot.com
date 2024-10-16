@@ -64,6 +64,7 @@ export async function createImmortalPage(
     <main>
         <article>
             <div class="content-area grid-container">
+                <div class="grid-3"></div>
                 <div class="grid-6">
                     <h1>${title}</h1>
                 </div>
@@ -93,26 +94,26 @@ export async function createImmortalPage(
         </article>
     </main>
     <footer>
-        <table>
-            <tr>
-                <td>Publish date</td>
-                <td>${new Date(date).toDateString()}</td>
+        <table class="borderless">
+            <tr class="borderless">
+                <td class="borderless">Publish date</td>
+                <td class="borderless">${new Date(date).toDateString()}</td>
             </tr>
-            <tr>
-                <td>Swarm feed</td>
-                <td>${blogState.feed}</td>
+            <tr class="borderless">
+                <td class="borderless">Swarm feed</td>
+                <td class="borderless">${blogState.feed}</td>
             </tr>
-            <tr>
-                <td>Postage batch</td>
-                <td>${swarmState.postageBatchId}</td>
+            <tr class="borderless">
+                <td class="borderless">Postage batch</td>
+                <td class="borderless">${swarmState.postageBatchId}</td>
             </tr>
-            <tr>
-                <td>Valid until</td>
-                <td id="ttl">Loading...</td>
+            <tr class="borderless">
+                <td class="borderless">Valid until</td>
+                <td class="borderless" id="ttl">Loading...</td>
             </tr>
-            <tr>
-                <td>Actions</td>
-                <td>
+            <tr class="borderless">
+                <td class="borderless">Actions</td>
+                <td class="borderless">
                     <button id="pin">Pin</button>
                     <button id="download">Download</button>
                     <button id="topup">Top up</button>

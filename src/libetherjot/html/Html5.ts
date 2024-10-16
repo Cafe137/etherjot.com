@@ -5,6 +5,7 @@ export async function createHtml5(head: string, body: string, depth: number): Pr
         <head>
             <meta charset="UTF-8">
             <link rel="icon" href="${'../'.repeat(depth)}favicon.png">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             ${head}
         </head>
         <body>

@@ -71,6 +71,14 @@ export function MenuBar({ blogState, swarmState }: Props) {
         })
     }
 
+    function onViewBlogKeyAddress() {
+        Swal.fire({
+            title: 'Blog Key Address',
+            text: blogState.wallet.address,
+            icon: 'info'
+        })
+    }
+
     function onShowAssetBrowser() {
         assetBrowserChannel.publish(true)
     }
@@ -120,7 +128,13 @@ export function MenuBar({ blogState, swarmState }: Props) {
                         { name: 'Load from FDP Storage', onClick: onLoadFromDrive }
                     ]}
                 />
-                <MenuItem name="View" actions={[{ name: 'Swarm Hash', onClick: onViewSwarmHash }]} />
+                <MenuItem
+                    name="View"
+                    actions={[
+                        { name: 'Swarm Hash', onClick: onViewSwarmHash },
+                        { name: 'Blog Key Address', onClick: onViewBlogKeyAddress }
+                    ]}
+                />
                 <MenuItem name="Go" actions={[{ name: 'Blog...', onClick: onGoToBlog }]} />
                 <MenuItem
                     name="Settings"

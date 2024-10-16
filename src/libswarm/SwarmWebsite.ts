@@ -29,6 +29,6 @@ export class SwarmWebsite {
             Binary.hexToUint8Array(this.collection.getHash()) as Bytes<32>,
             { deferred: true, index, pin: true }
         )
-        return feedUploadResults
+        return feedUploadResults.reference
     }
 }

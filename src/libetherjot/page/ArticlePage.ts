@@ -5,7 +5,7 @@ import { ParsedMarkdown } from '../engine/FrontMatter'
 import { preprocess } from '../engine/Preprocessor'
 import { SwarmState } from '../engine/SwarmState'
 import { createArticleSlug } from '../engine/Utility'
-import { createCommentSystem } from '../html/Comment'
+import { createCommentContainer, createCommentScripts } from '../html/Comment'
 import { createDonationButton } from '../html/Donation'
 import { createFooter } from '../html/Footer'
 import { createHeader } from '../html/Header'
@@ -109,11 +109,7 @@ export async function createArticlePage(
                               )
                             : ''
                     }
-                    ${
-                        blogState.configuration.extensions.comments
-                            ? await createCommentSystem(`${blogState.feed}/${title}`, commentsFeed)
-                            : ''
-                    }
+                    ${blogState.configuration.extensions.comments ? await createCommentContainer() : ''}
                 </div>
             </div>
         </article>
@@ -131,7 +127,12 @@ export async function createArticlePage(
         shareImmortal.addEventListener('click', () => {
             window.open('http://localhost:1633/bzz/${immortalHash}', '_blank')
         })
-    </script>`
+    </script>
+    ${
+        blogState.configuration.extensions.comments
+            ? await createCommentScripts(`${blogState.feed}/${title}`, commentsFeed)
+            : ''
+    }`
     const year = new Date(date).getFullYear()
     const html = await createHtml5(head, body, 2)
     const markdownHandle = await (await swarmState.swarm.newResource('index.md', markdown.body, 'text/markdown')).save()

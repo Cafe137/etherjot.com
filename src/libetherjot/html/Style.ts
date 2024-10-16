@@ -24,6 +24,7 @@ body {
 header {
     background-color: #f6f6f6;
     padding: 30px;
+    padding-top: 28px;
     padding-bottom: 28px;
 }
 main {
@@ -36,9 +37,6 @@ footer {
     padding: 32px;
     padding-top: 85px;
     padding-bottom: 85px;
-}
-tr {
-    height: 50px;
 }
 .footer-container {
     display: flex;
@@ -91,12 +89,27 @@ article p {
 article h1 {
     font-size: 53px;
     font-weight: bold;
+    word-break: break-word;
 }
 article h2 {
     font-size: 32px;
+    word-break: break-word;
 }
 a {
     text-decoration: none;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table, tr, th, td {
+    border: 1px solid #626262;
+}
+td, th {
+    padding: 8px;
+}
+.borderless {
+    border: none;
 }
 .header-top-row {
     display: flex;
@@ -301,6 +314,7 @@ aside {
 .footer-description {
     font-size: 12px;
     margin-top: 28px;
+    margin-bottom: 28px;
 }
 .nav-item {
     font-size: 14px;
@@ -340,6 +354,7 @@ aside {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 8px;
+    align-items: flex-start;
 }
 .footer-link {
     display: flex;
@@ -481,8 +496,34 @@ button {
     }
 }
 @media screen and (max-width: 600px) {
+    article h1 {
+        font-size: 32px;
+    }
+    article h2 {
+        font-size: 24px;
+    }
+    header {
+        padding: 0px;
+    }
+    footer {
+        padding: 0px;
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+    .blog-description {
+        margin-top: 64px;
+        max-width: 100%;
+    }
+    .footer-links {
+        display: flex;
+        flex-direction: column;
+    }
     .grid-3 {
         grid-column: span 12;
+    }
+    .grid-container {
+        grid-template-columns: repeat(1, 1fr);
+        column-gap: 0;
     }
     .post-container {
         grid-template-columns: repeat(1, 1fr);
