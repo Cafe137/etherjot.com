@@ -1,7 +1,13 @@
 import { Arrays } from 'cafe-utility'
 import { useEffect, useState } from 'react'
 import { DEFAULT_CONTENT } from '../Constants'
-import { onArticleBeginEdit, onArticleReset, onContentInsert, onContentReplace } from '../GlobalContext'
+import {
+    onArticleBeginEdit,
+    onArticleReset,
+    onArticleSuccess,
+    onContentInsert,
+    onContentReplace
+} from '../GlobalContext'
 import { BlogState } from '../libetherjot/engine/BlogState'
 import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { MenuBar } from '../MenuBar'
@@ -30,6 +36,9 @@ export function EditorScreen({ blogState, swarmState }: Props) {
             }),
             onArticleBeginEdit.subscribe(article => {
                 setArticleContent(article.markdown.body)
+            }),
+            onArticleSuccess.subscribe(() => {
+                setArticleContent(DEFAULT_CONTENT)
             })
         ])
     }, [])

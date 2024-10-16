@@ -20,8 +20,8 @@ export async function createImmortalPage(
     let bannerDataUri: string
     const bannerAsset = banner ? blogState.assets.find(x => x.reference === banner) : null
     if (bannerAsset) {
-        const data = await bee.downloadFile(bannerAsset.reference)
-        bannerDataUri = `data:${bannerAsset.contentType};base64,${Binary.uint8ArrayToBase64(data.data)}`
+        const data = await bee.downloadData(bannerAsset.reference)
+        bannerDataUri = `data:${bannerAsset.contentType};base64,${Binary.uint8ArrayToBase64(data)}`
     } else {
         bannerDataUri = `data:image/png;base64,${DEFAULT_IMAGE}`
     }

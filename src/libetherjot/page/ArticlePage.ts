@@ -32,7 +32,7 @@ export async function createArticlePage(
     const immortalHash = await createImmortalPage(swarmState, blogState, title, markdown, banner, date)
     const processedArticle = await preprocess(parse(markdown.body))
     const sidebarPublishedHtml = tags.length
-        ? `<div class="article-sidebar-block"><h3>Published in:</h3><div class="tag-cloud">${createTagCloud(
+        ? `<div class="article-sidebar-block"><h3>Tags:</h3><div class="tag-cloud">${createTagCloud(
               tags,
               2
           )}</div></div>`
@@ -109,7 +109,11 @@ export async function createArticlePage(
                               )
                             : ''
                     }
-                    ${blogState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
+                    ${
+                        blogState.configuration.extensions.comments
+                            ? await createCommentSystem(`${blogState.feed}/${title}`, commentsFeed)
+                            : ''
+                    }
                 </div>
             </div>
         </article>

@@ -1,4 +1,3 @@
-import { Strings } from 'cafe-utility'
 import { BlogState } from '../engine/BlogState'
 import { createDiscordSvg } from './DiscordSvg'
 import { createGithubSvg } from './GithubSvg'
@@ -21,10 +20,9 @@ export async function createFooter(blogState: BlogState) {
         ? createLinkSvg(createLinkedinSvg(), 'LinkedIn', footer.links.linkedIn)
         : ''
     const linkHtml = blogState.configuration.header.linkAddress
-        ? `${Strings.resolveMarkdownLinks(
-              blogState.configuration.header.linkAddress,
-              (_, link) => `<a class="footer-link" href="${link}" target="_blank">${createHomeSvg()} Visit website</a>`
-          )}`
+        ? `<a class="footer-link" href="${
+              blogState.configuration.header.linkAddress
+          }" target="_blank">${createHomeSvg()} Visit website</a>`
         : ''
 
     return `
