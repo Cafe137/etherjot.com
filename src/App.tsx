@@ -147,7 +147,7 @@ export function App() {
                     article.markdown,
                     article.category,
                     article.tags,
-                    article.banner || 'default.png',
+                    article.banner,
                     article.date,
                     article.type
                 )
@@ -195,7 +195,7 @@ export function App() {
                     article.markdown,
                     article.category,
                     article.tags,
-                    article.banner || 'default.png',
+                    article.banner,
                     article.date,
                     article.type
                 )

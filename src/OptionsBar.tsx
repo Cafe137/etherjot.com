@@ -1,5 +1,6 @@
 import { Arrays, Dates, Strings } from 'cafe-utility'
 import { useEffect, useState } from 'react'
+import Swal from 'sweetalert2'
 import { Button } from './Button'
 import {
     ArticleEdit,
@@ -12,9 +13,9 @@ import {
     onArticleSuccess,
     onSaveToDrive,
     onSaveToDriveRequest,
-    onSaveToLocal,
-    onSaveToLocalRequest
+    onSaveToLocal
 } from './GlobalContext'
+import { saveAsMarkdown } from './io/LoadSave'
 import { parseMarkdown } from './libetherjot/engine/FrontMatter'
 import { Setting } from './Setting'
 import './Sidebar.css'
@@ -47,18 +48,6 @@ export function OptionsBar({ articleContent }: Props) {
                 setEditing(article)
                 setArticleType(article.type)
             }),
-            onSaveToDriveRequest.subscribe(() => {
-                onSaveToDrive.publish({
-                    content: articleContent,
-                    article: editing || undefined
-                })
-            }),
-            onSaveToLocalRequest.subscribe(() => {
-                onSaveToLocal.publish({
-                    content: articleContent,
-                    article: editing || undefined
-                })
-            }),
             assetPickChannel.subscribe(asset => {
                 asset.ifPresent(a => {
                     setArticleBanner(a.reference)
@@ -86,6 +75,28 @@ export function OptionsBar({ articleContent }: Props) {
             })
         ])
     }, [])
+
+    useEffect(() => {
+        return Arrays.multicall([
+            onSaveToLocal.subscribe(() => {
+                if (!editing) {
+                    Swal.fire({
+                        title: 'Action required',
+                        text: 'Open an article in edit mode first to save it locally',
+                        icon: 'info'
+                    })
+                    return
+                }
+                saveAsMarkdown(articleContent, editing)
+            }),
+            onSaveToDriveRequest.subscribe(() => {
+                onSaveToDrive.publish({
+                    content: articleContent,
+                    article: editing || undefined
+                })
+            })
+        ])
+    }, [articleContent, editing])
 
     async function onPublish() {
         if (!articleTitle || !articleContent) {

@@ -36,7 +36,7 @@ function buildArticle(
         x.tags,
         x.createdAt,
         x.path.replace('post/', ''),
-        x.banner || 'default.png',
+        x.banner,
         as,
         depth
     )

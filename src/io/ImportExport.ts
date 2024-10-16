@@ -3,24 +3,34 @@ import { Dates, Strings } from 'cafe-utility'
 import JSZip from 'jszip'
 import Swal from 'sweetalert2'
 import { swalLogin } from '../account/SwalLogin'
-import { onZipImport } from '../GlobalContext'
+import { ArticleMetadata, onZipImport } from '../GlobalContext'
 import { Article, BlogState, saveBlogState } from '../libetherjot/engine/BlogState'
 import { saveSwarmState, SwarmState } from '../libetherjot/engine/SwarmState'
 import { makeFdp } from './FdpMaker'
 
 export async function articleToMarkdown(bee: Bee, article: Article): Promise<string> {
-    let markdown = (await bee.downloadFile(article.markdown)).data.text()
-    markdown = `---
+    const markdown = (await bee.downloadFile(article.markdown)).data.text()
+    return articleToMarkdownLocal(markdown, {
+        title: article.title,
+        category: article.category,
+        tags: article.tags,
+        date: Dates.isoDate(new Date(article.createdAt)),
+        banner: article.banner,
+        type: article.kind
+    })
+}
+
+export function articleToMarkdownLocal(content: string, article: ArticleMetadata): string {
+    return `---
 title: ${article.title}
 category: ${article.category}
 tags: ${article.tags.join(',')}
-date: ${article.createdAt}
+date: ${article.date}
 banner: ${article.banner}
-kind: ${article.kind}
+kind: ${article.type}
 ---
 
-${markdown}`
-    return markdown
+${content}`
 }
 
 export async function onDriveImport() {

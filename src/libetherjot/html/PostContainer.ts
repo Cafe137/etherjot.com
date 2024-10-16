@@ -77,16 +77,5 @@ function buildArticle(
     as: 'h1' | 'h2' | 'highlight' | 'regular',
     depth: number
 ): string {
-    return createPost(
-        blogState,
-        x.title,
-        x.preview,
-        x.category,
-        x.tags,
-        x.createdAt,
-        x.path,
-        x.banner || 'default.png',
-        as,
-        depth
-    )
+    return createPost(blogState, x.title, x.preview, x.category, x.tags, x.createdAt, x.path, x.banner, as, depth)
 }

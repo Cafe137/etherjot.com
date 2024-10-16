@@ -3,16 +3,16 @@ import Swal from 'sweetalert2'
 import { swalFiles } from '../account/SwalFiles'
 import { swalLogin } from '../account/SwalLogin'
 import { swalPods } from '../account/SwalPods'
-import { onContentReplace } from '../GlobalContext'
+import { ArticleMetadata, onContentReplace } from '../GlobalContext'
 import { Article, BlogState } from '../libetherjot/engine/BlogState'
 import { SwarmState } from '../libetherjot/engine/SwarmState'
 import { Credentials } from '../type/Credentials'
 import { makeFdp } from './FdpMaker'
-import { articleToMarkdown } from './ImportExport'
+import { articleToMarkdown, articleToMarkdownLocal } from './ImportExport'
 
-export async function saveAsMarkdown(bee: Bee, content: string, article?: Article): Promise<void> {
-    const fileContent = article ? await articleToMarkdown(bee, article) : content
-    const blob = new Blob([fileContent], { type: 'text/markdown' })
+export function saveAsMarkdown(content: string, article: ArticleMetadata): void {
+    content = articleToMarkdownLocal(content, article)
+    const blob = new Blob([content], { type: 'text/markdown' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

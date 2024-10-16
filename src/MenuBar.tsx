@@ -7,7 +7,7 @@ import {
     onArticleReset,
     onBlogReset,
     onSaveToDriveRequest,
-    onSaveToLocalRequest,
+    onSaveToLocal,
     screenChannel
 } from './GlobalContext'
 import { Horizontal } from './Horizontal'
@@ -109,7 +109,7 @@ export function MenuBar({ blogState, swarmState }: Props) {
     }
 
     async function onSaveAsMarkdown() {
-        onSaveToLocalRequest.publish()
+        onSaveToLocal.publish()
     }
 
     async function onSaveToDrive() {
