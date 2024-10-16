@@ -63,6 +63,11 @@ export function MenuBar({ blogState, swarmState }: Props) {
         window.open(url, '_blank')
     }
 
+    function onGoToENS() {
+        const url = 'https://app.ens.domains/'
+        window.open(url, '_blank')
+    }
+
     function onViewSwarmHash() {
         Swal.fire({
             title: 'Swarm Hash',
@@ -122,7 +127,7 @@ export function MenuBar({ blogState, swarmState }: Props) {
                     name="File"
                     actions={[
                         { name: 'New Article', onClick: onNewArticle },
-                        { name: 'Assets...', onClick: onShowAssetBrowser },
+                        { name: 'Assets', onClick: onShowAssetBrowser },
                         { name: 'Save as markdown', onClick: onSaveAsMarkdown },
                         { name: 'Save to FDP Storage', onClick: onSaveToDrive },
                         { name: 'Load from FDP Storage', onClick: onLoadFromDrive }
@@ -135,11 +140,17 @@ export function MenuBar({ blogState, swarmState }: Props) {
                         { name: 'Blog Key Address', onClick: onViewBlogKeyAddress }
                     ]}
                 />
-                <MenuItem name="Go" actions={[{ name: 'Blog...', onClick: onGoToBlog }]} />
+                <MenuItem
+                    name="Go"
+                    actions={[
+                        { name: 'Blog', onClick: onGoToBlog },
+                        { name: 'ENS', onClick: onGoToENS }
+                    ]}
+                />
                 <MenuItem
                     name="Settings"
                     actions={[
-                        { name: 'Settings...', onClick: onSettings },
+                        { name: 'Settings', onClick: onSettings },
                         { name: 'Reset', onClick: onReset }
                     ]}
                 />

@@ -17,7 +17,6 @@ tags: ${article.tags.join(',')}
 date: ${article.createdAt}
 banner: ${article.banner}
 kind: ${article.kind}
-commentsFeed: ${article.commentsFeed}
 ---
 
 ${markdown}`

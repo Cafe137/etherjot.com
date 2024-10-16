@@ -48,7 +48,6 @@ export function ExistingArticle({ swarmState, blogState, article }: Props) {
             tags: article.tags,
             banner: article.banner,
             date: Dates.isoDate(new Date(article.createdAt)),
-            commentsFeed: article.commentsFeed,
             type: article.kind,
             oldTitle: article.title
         })

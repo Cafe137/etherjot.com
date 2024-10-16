@@ -84,12 +84,6 @@ export class ParsedMarkdownReader {
             : Dates.isoDate()
     }
 
-    commentsFeed(): string {
-        return Types.isString(this.parsed.attributes.commentsFeed)
-            ? this.parsed.attributes.commentsFeed
-            : Strings.randomHex(40)
-    }
-
     type(): 'regular' | 'h1' | 'h2' | 'highlight' {
         return ['regular', 'h1', 'h2', 'highlight'].includes(this.parsed.attributes.type as any)
             ? (this.parsed.attributes.type as 'regular' | 'h1' | 'h2' | 'highlight')

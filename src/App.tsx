@@ -149,7 +149,6 @@ export function App() {
                     article.tags,
                     article.banner || 'default.png',
                     article.date,
-                    article.commentsFeed,
                     article.type
                 )
                 blogState.articles.push(articlePage)
@@ -177,7 +176,6 @@ export function App() {
                             reader.tags(),
                             reader.banner(),
                             reader.date(),
-                            reader.commentsFeed(),
                             reader.type()
                         )
                         blogState.articles.push(articlePage)
@@ -199,7 +197,6 @@ export function App() {
                     article.tags,
                     article.banner || 'default.png',
                     article.date,
-                    article.commentsFeed,
                     article.type
                 )
                 blogState.articles.push(articlePage)

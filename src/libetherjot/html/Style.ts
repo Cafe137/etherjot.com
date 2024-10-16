@@ -504,6 +504,8 @@ button {
     }
     header {
         padding: 0px;
+        padding-top: 28px;
+        padding-bottom: 28px;
     }
     footer {
         padding: 0px;

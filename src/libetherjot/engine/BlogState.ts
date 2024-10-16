@@ -52,7 +52,6 @@ export interface Article {
     banner: string
     kind: 'h1' | 'h2' | 'regular' | 'highlight'
     stamp: string
-    commentsFeed: string
 }
 
 export interface BlogStateOnDisk {
@@ -129,8 +128,7 @@ export function getBlogState(json: Record<string, any>): BlogState {
                 path: Types.asString(x.path),
                 banner: x.banner || null,
                 kind,
-                stamp: Types.asString(x.stamp),
-                commentsFeed: Types.asString(x.commentsFeed)
+                stamp: Types.asString(x.stamp)
             }
         }),
         collections: Types.asObject(json.collections || {}) as Record<string, string>,

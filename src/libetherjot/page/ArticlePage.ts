@@ -26,7 +26,6 @@ export async function createArticlePage(
     tags: string[],
     banner: string,
     date: string,
-    commentsFeed: string,
     kind: 'regular' | 'h1' | 'h2' | 'highlight'
 ): Promise<Article> {
     const immortalHash = await createImmortalPage(swarmState, blogState, title, markdown, banner, date)
@@ -128,11 +127,7 @@ export async function createArticlePage(
             window.open('http://localhost:1633/bzz/${immortalHash}', '_blank')
         })
     </script>
-    ${
-        blogState.configuration.extensions.comments
-            ? await createCommentScripts(`${blogState.feed}/${title}`, commentsFeed)
-            : ''
-    }`
+    ${blogState.configuration.extensions.comments ? await createCommentScripts(`${blogState.feed}/${title}`) : ''}`
     const year = new Date(date).getFullYear()
     const html = await createHtml5(head, body, 2)
     const markdownHandle = await (await swarmState.swarm.newResource('index.md', markdown.body, 'text/markdown')).save()
@@ -149,7 +144,6 @@ export async function createArticlePage(
         html: htmlHash,
         path,
         createdAt: new Date(date).getTime(),
-        commentsFeed,
         stamp: await swarmState.swarm.mustGetUsableStamp()
     }
 }

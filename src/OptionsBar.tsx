@@ -35,7 +35,6 @@ export function OptionsBar({ articleContent }: Props) {
     const [articleType, setArticleType] = useState<'regular' | 'h1' | 'h2' | 'highlight'>('regular')
     const [articleDate, setArticleDate] = useState(Dates.isoDate())
     const [editing, setEditing] = useState<ArticleEdit | false>(false)
-    const [commentsFeed, setCommentsFeed] = useState<string>(Strings.randomHex(40))
 
     useEffect(() => {
         return Arrays.multicall([
@@ -46,7 +45,6 @@ export function OptionsBar({ articleContent }: Props) {
                 setArticleBanner(article.banner && article.banner !== 'default.png' ? article.banner : null)
                 setArticleDate(article.date)
                 setEditing(article)
-                setCommentsFeed(article.commentsFeed)
                 setArticleType(article.type)
             }),
             onSaveToDriveRequest.subscribe(() => {
@@ -73,7 +71,6 @@ export function OptionsBar({ articleContent }: Props) {
                 setArticleBanner(null)
                 setArticleDate(Dates.isoDate())
                 setEditing(false)
-                setCommentsFeed(Strings.randomHex(40))
                 setArticleType('regular')
                 setLoading(false)
             }),
@@ -84,7 +81,6 @@ export function OptionsBar({ articleContent }: Props) {
                 setArticleBanner(null)
                 setArticleDate(Dates.isoDate())
                 setEditing(false)
-                setCommentsFeed(Strings.randomHex(40))
                 setArticleType('regular')
                 setLoading(false)
             })
@@ -108,7 +104,6 @@ export function OptionsBar({ articleContent }: Props) {
                     .filter(x => x),
                 banner: articleBanner || '',
                 date: articleDate,
-                commentsFeed,
                 type: articleType
             })
             setEditing(false)
@@ -123,7 +118,6 @@ export function OptionsBar({ articleContent }: Props) {
                     .filter(x => x),
                 banner: articleBanner || '',
                 date: articleDate,
-                commentsFeed,
                 type: articleType
             })
         }

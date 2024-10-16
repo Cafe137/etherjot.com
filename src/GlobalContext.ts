@@ -11,7 +11,6 @@ interface ArticleBase {
     tags: string[]
     banner?: string
     date: string
-    commentsFeed: string
     type: 'regular' | 'h1' | 'h2' | 'highlight'
 }
 

@@ -44,7 +44,6 @@ export async function recreateMantaray(swarmState: SwarmState, blogState: BlogSt
             article.tags,
             article.banner,
             Dates.isoDate(new Date(article.createdAt)),
-            article.commentsFeed,
             article.kind
         )
         await collection.addHandle(
