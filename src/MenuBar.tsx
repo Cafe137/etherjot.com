@@ -68,6 +68,11 @@ export function MenuBar({ blogState, swarmState }: Props) {
         window.open(url, '_blank')
     }
 
+    function onGoToSupport() {
+        const url = 'https://github.com/Cafe137/etherjot.com'
+        window.open(url, '_blank')
+    }
+
     function onViewSwarmHash() {
         Swal.fire({
             title: 'Swarm Hash',
@@ -144,7 +149,8 @@ export function MenuBar({ blogState, swarmState }: Props) {
                     name="Go"
                     actions={[
                         { name: 'Blog', onClick: onGoToBlog },
-                        { name: 'ENS', onClick: onGoToENS }
+                        { name: 'ENS', onClick: onGoToENS },
+                        { name: 'Support', onClick: onGoToSupport }
                     ]}
                 />
                 <MenuItem
